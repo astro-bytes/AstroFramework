@@ -1,0 +1,82 @@
+{
+  "configurations" : [
+    {
+      "id" : "497A5841-3E2B-4D11-8983-D770769848DA",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "codeCoverage" : {
+      "targets" : [
+        {
+          "containerPath" : "container:",
+          "identifier" : "GatewayBasics",
+          "name" : "GatewayBasics"
+        },
+        {
+          "containerPath" : "container:",
+          "identifier" : "Logger",
+          "name" : "Logger"
+        },
+        {
+          "containerPath" : "container:",
+          "identifier" : "UseCaseBasics",
+          "name" : "UseCaseBasics"
+        },
+        {
+          "containerPath" : "container:",
+          "identifier" : "Utility",
+          "name" : "Utility"
+        }
+      ]
+    }
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:",
+        "identifier" : "EntityBasicsTests",
+        "name" : "EntityBasicsTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:",
+        "identifier" : "GatewayBasicsTests",
+        "name" : "GatewayBasicsTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:",
+        "identifier" : "LoggerTests",
+        "name" : "LoggerTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:",
+        "identifier" : "UniversalUITests",
+        "name" : "UniversalUITests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:",
+        "identifier" : "UseCaseBasicsTests",
+        "name" : "UseCaseBasicsTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:",
+        "identifier" : "UtilityTests",
+        "name" : "UtilityTests"
+      }
+    }
+  ],
+  "version" : 1
+}
