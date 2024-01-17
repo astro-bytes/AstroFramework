@@ -6,53 +6,30 @@
 //
 
 import Foundation
+import Combine
 
-/// The Repository Protocol abstracts the data access layer and provides a set of methods to interact with the underlying data.
+/// Interface that follows the Repository Pattern.
+/// This structurally provides a way to access data from an underlying ``DataStore`` in a uniform way.
 public protocol Repository {
-    /// The object that the repository is attempting to get or set
-    associatedtype Payload: Identifiable
+    /// Generic defining the data type used by the repository
+    associatedtype Payload
     
-    /// Used to get the Payload from a Data Store or Source
-    /// - Parameter id: the identifier to the specific payload to be reached
-    /// - Returns: the a non nil payload if found, otherwise nil.
-    func get(id: Payload.ID) -> Payload?
+    /// The data with the ability to subscribe to and observe the data's current state
+    var data: AnyPublisher<DataResult<Payload>, Never> { get }
     
-    /// Used to get the Payload from a Data Store or Source
-    /// - Parameter id: the identifier to the specific payload to be reached
-    /// - Returns: the payload associated to the `id`
-    /// - Throws: a ``GatewayError`` if there is a problem finding the payload
-    func get(id: Payload.ID) throws -> Payload
+    /// Forces the data to be pulled and updated from the source instead of from the cache
+    func refresh()
     
-    /// Used to get the Payload from a Data Store or Source asynchronously
-    /// - Parameter id: the identifier to the specific payload to be reached
-    /// - Returns: the a non nil payload if found, otherwise nil.
-    func get(id: Payload.ID) async -> Payload?
+    /// Forces the data to be pulled and updated from the source instead of from the cache
+    /// - Returns: The current value of the data after a refresh
+    func refresh() async -> DataResult<Payload>
     
-    /// Used to get the Payload from a Data Store or Source asynchronously
-    /// - Parameter id: the identifier to the specific payload to be reached
-    /// - Returns: the payload associated to the `id`
-    /// - Throws: a ``GatewayError`` if there is a problem finding the payload
-    func get(id: Payload.ID) async throws -> Payload
+    /// - Returns: the current state value of the data.
+    func get() -> DataResult<Payload>
     
-    /// Used to set a particular payload value in the Data Store or Source
-    /// - Parameter payload: This is the object that is setting in the data source
-    /// - Returns: boolean flag indicating successful set when true, return value is discardable
-    @discardableResult
-    func set(payload: Payload) -> Bool
+    /// - Parameter payload: the new value that is being updated
+    func set()
     
-    /// Used to set a particular payload value in the Data Store or Source
-    /// - Parameter payload: This is the object that is setting in the data source
-    /// - Throws: a ``GatewayError`` if there is a problem setting the value
-    func set(payload: Payload) throws
-    
-    /// Used to set a particular payload value in the Data Store or Source asynchronously
-    /// - Parameter payload: This is the object that is setting in the data source
-    /// - Returns: boolean flag indicating successful set when true, return value is discardable
-    @discardableResult
-    func set(payload: Payload) async -> Bool
-    
-    /// Used to set a particular payload value in the Data Store or Source asynchronously
-    /// - Parameter payload: This is the object that is setting in the data source
-    /// - Throws: a ``GatewayError`` if there is a problem setting the value
-    func set(payload: Payload) async throws
+    /// Clears any cached data locally. A refresh should be called again to repopulate the ``data``.
+    func clear()
 }
