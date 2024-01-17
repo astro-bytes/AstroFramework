@@ -10,7 +10,7 @@ import Combine
 
 /// Interface that follows the Repository Pattern.
 /// This structurally provides a way to access data from an underlying ``DataStore`` in a uniform way.
-public protocol Repository {
+public protocol Repository<Payload> {
     /// Generic defining the data type used by the repository
     associatedtype Payload
     
@@ -28,7 +28,7 @@ public protocol Repository {
     func get() -> DataResult<Payload>
     
     /// - Parameter payload: the new value that is being updated
-    func set()
+    func set(_: Payload)
     
     /// Clears any cached data locally. A refresh should be called again to repopulate the ``data``.
     func clear()

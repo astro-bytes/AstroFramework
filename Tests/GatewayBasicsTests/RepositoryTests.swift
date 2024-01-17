@@ -6,6 +6,7 @@
 //
 
 import XCTest
+import GatewayBasics
 
 final class RepositoryTests: XCTestCase {
 
@@ -18,18 +19,21 @@ final class RepositoryTests: XCTestCase {
     }
 
     func testExample() throws {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
-        // Any test you write for XCTest can be annotated as throws and async.
-        // Mark your test throws to produce an unexpected failure when your test encounters an uncaught error.
-        // Mark your test async to allow awaiting for asynchronous code to complete. Check the results with assertions afterwards.
+        let repo = UserRepository()
+        repo.set(.johnDoe)
+        XCTAssertEqual(repo.user, .johnDoe)
     }
-
-    func testPerformanceExample() throws {
-        // This is an example of a performance test case.
-        self.measure {
-            // Put the code you want to measure the time of here.
-        }
+    
+    func testUsers() {
+        let userRepo = UserRepository()
+        let usersRepo = UsersRepository()
+        let usecase = CreateUser(userRepo: userRepo, usersRepo: usersRepo)
+        let expected = User(name: "Johnny Lingo", age: 14)
+        let users = usecase.execute(name: expected.name, age: expected.age)
+        XCTAssertEqual(userRepo.user?.name, expected.name)
+        XCTAssertEqual(userRepo.user?.age, expected.age)
+        XCTAssertEqual(users, [expected])
+        XCTAssertEqual(usersRepo.users, [expected])
     }
 
 }
