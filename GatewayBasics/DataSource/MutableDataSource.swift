@@ -14,30 +14,30 @@ public protocol MutableDataSource<Payload> {
     associatedtype Payload: Identifiable
     
     /// Instantiates ``DataSource`` instance. If the instance exists nothing is done.
-    func initialize()
+    func initialize() async throws
     
     /// Deletes ``DataSource`` instance.
-    func delete()
+    func delete() async throws
     
     /// Inserts a new``Payload`` instance.
     /// - Parameter payload: the object being created in the source
-    func insert(_ payload: Payload)
+    func insert(_ payload: Payload) async throws
     
     /// Updates a specific ``Payload`` instance. If the specific instance does not exist a new instance is inserted.
     /// - Parameter payload: the object being updated in the source
-    func update(_ payload: Payload)
+    func update(_ payload: Payload) async throws
     
     /// - Returns a specific ``Payload`` instance from source.
     /// - Parameter id: identifier tied to the payload value fetched from source
-    func fetch(id: Payload.ID) -> Result<Payload, Error>
+    func fetch(id: Payload.ID) async -> Result<Payload, Error>
     
     /// - Returns Fetches all ``Payload`` instances from source.
-    func fetch() -> Result<[Payload.ID: Payload], Error>
+    func fetch() async -> Result<[Payload.ID: Payload], Error>
     
     /// Removes a specific ``Payload`` from the source.
     /// - Parameter id: identifier tied to the payload value removed from source
-    func remove(id: Payload.ID)
+    func remove(id: Payload.ID) async throws
     
     /// Removes all ``Payload`` objects from the source, but does not delete the source instance.
-    func clear()
+    func clear() async throws
 }

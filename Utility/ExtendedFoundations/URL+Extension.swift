@@ -8,12 +8,14 @@
 import Foundation
 
 extension URL {
-    // TODO: Comment
+    /// Checks if the URL represents a directory.
+    /// - Returns: `true` if the URL is a directory; otherwise, `false`.
     public var isDirectory: Bool {
         (try? resourceValues(forKeys: [.isDirectoryKey]))?.isDirectory == true
     }
     
-    // TODO: Comment
+    /// Checks if the URL represents a regular file.
+    /// - Returns: `true` if the URL is a regular file; otherwise, `false`.
     public var isFile: Bool {
         (try? resourceValues(forKeys: [.isRegularFileKey]))?.isRegularFile == true
     }

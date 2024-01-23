@@ -84,7 +84,7 @@ private struct ReportErrorEnvironmentKey: EnvironmentKey {
 }
 
 extension EnvironmentValues {
-    // TODO: Comment
+    /// A key for setting and retrieving the closure to report errors.
     public var reportError: ((Error) -> Void)? {
         get { self[ReportErrorEnvironmentKey.self] }
         set { self[ReportErrorEnvironmentKey.self] = newValue }

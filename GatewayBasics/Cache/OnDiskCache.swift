@@ -10,23 +10,23 @@ import Logger
 import UseCaseBasics
 import Utility
 
-/// Requirements:
-/// - Store Data to cache directory
-/// - Store the Data Securely with encryption
-/// - Access data via memory object
+/// A class representing an on-disk cache with expirable data, inheriting from `InMemoryCache`.
+/// This cache persists data on disk, allowing for retrieval even after the application restarts.
+/// It supports optional encryption for added security.
 public class OnDiskCache<Payload: Codable>: InMemoryCache<Payload> {
-    /// The name of the cache file
+    /// The name of the cache file.
     let filename: String
     
-    /// Flag indicating that the cache is encrypted or not
+    /// Flag indicating whether the cache is encrypted or not.
     let encrypted: Bool
     
-    /// container with access to cached values with
+    /// Container with access to cached values.
     let defaults: UserDefaults
     
-    /// the name used that is unique enough to work as a key
+    /// The unique name used as a key for UserDefaults.
     let name: String
     
+    /// Overrides the cachedDate property to persist the value in UserDefaults.
     public override var cachedDate: Date? {
         /// sets the cached date value to user defaults for safe keeping
         set { defaults.set(newValue, forKey: name) }
@@ -34,12 +34,12 @@ public class OnDiskCache<Payload: Codable>: InMemoryCache<Payload> {
         get { defaults.object(forKey: name) as? Date }
     }
     
-    /// Creates a datastore with an on disk expirable cache
+    /// Creates a datastore with an on-disk expirable cache.
     /// - Parameters:
-    ///   - name: the key name used to store the CachedDate and CacheFile, defaults to the Payload.type
-    ///   - lifetime: the time that the cache has to live before becoming expired
-    ///   - encrypted: flag indicating the data is stored as encrypted objects
-    ///   - invalidateImmediately: flag that indicates if when initialized the cache should be immediately invalidated and removed from disk
+    ///   - name: The key name used to store the cached date and cache file, defaults to Payload.type.
+    ///   - lifetime: The time that the cache has to live before becoming expired.
+    ///   - encrypted: Flag indicating if the data is stored as encrypted objects.
+    ///   - invalidateImmediately: Flag indicating if the cache should be immediately invalidated and removed from disk when initialized.
     public init(name: String = "\(Payload.self)",
                 lifetime: TimeInterval, encrypted: Bool = true,
                 invalidateImmediately: Bool = false) {
@@ -69,6 +69,7 @@ public class OnDiskCache<Payload: Codable>: InMemoryCache<Payload> {
         }
     }
     
+    /// Overrides the set method to encode, encrypt (if applicable), and store the cache on disk.
     public override func set(_ result: DataResult<Payload>) throws {
         try super.set(result)
         // encode
@@ -83,6 +84,7 @@ public class OnDiskCache<Payload: Codable>: InMemoryCache<Payload> {
         try jsonData.write(to: url)
     }
     
+    /// Overrides the clear method to delete the cache file and key (if applicable).
     public override func clear() throws {
         try super.clear()
         // Delete File
@@ -94,7 +96,8 @@ public class OnDiskCache<Payload: Codable>: InMemoryCache<Payload> {
         }
     }
     
-    /// - Returns a data result of the cache value
+    /// Retrieves the cache value from the disk.
+    /// - Returns: A data result of the cache value.
     func get() -> DataResult<Payload> {
         do {
             // read file
@@ -123,7 +126,8 @@ public class OnDiskCache<Payload: Codable>: InMemoryCache<Payload> {
         }
     }
     
-    /// - Returns the file URL related to the Cache
+    /// Returns the file URL related to the cache.
+    /// - Returns: The file URL related to the cache.
     func cacheFileURL() throws -> URL {
         let manager = FileManager.default
         let cacheURL = try manager.url(

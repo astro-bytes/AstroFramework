@@ -7,8 +7,10 @@
 
 import Foundation
 
+/// An extension on Set providing a computed property to convert the set to an array.
 extension Set {
-    // TODO: Comment & Test
+    /// Converts the set to an array.
+    /// - Returns: An array containing the elements of the set.
     public var asArray: [Element] {
         map { $0 }
     }
