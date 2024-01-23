@@ -10,7 +10,7 @@ import Foundation
 /// An extension on Result providing computed properties to extract the value or error.
 extension Result {
     /// Gets the success value if the result is a success, or nil if it's a failure.
-    var value: Success? {
+    public var value: Success? {
         switch self {
         case .success(let success):
             return success
@@ -20,7 +20,7 @@ extension Result {
     }
     
     /// Gets the failure value if the result is a failure, or nil if it's a success.
-    var error: Failure? {
+    public var error: Failure? {
         switch self {
         case .success:
             return nil
