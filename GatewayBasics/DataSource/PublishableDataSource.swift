@@ -9,10 +9,10 @@ import Foundation
 import Combine
 
 /// A protocol for data sources that can be synchronized, providing a publisher for updates.
-public protocol PublishableDataSource<Payload> {
+public protocol PublishableDataSource {
     /// Generic representing the return value of a successful fetch
-    associatedtype Payload
+    associatedtype Output
     
     /// - Returns a publisher which can be subscribed to
-    var publisher: AnyPublisher<Payload, Error> { get }
+    var publisher: AnyPublisher<Output, Error> { get }
 }

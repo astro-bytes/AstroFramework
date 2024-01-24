@@ -9,9 +9,9 @@ import Foundation
 
 // TODO: It would be nice if this was able to be a data source as well... or extend it
 /// A protocol for mutable data sources with Payload management capabilities.
-public protocol MutableDataSource<Payload> {
+public protocol MutableDataSource<MutablePayload> {
     /// Generic type representing the Type of underlying data at the source
-    associatedtype Payload: Identifiable
+    associatedtype MutablePayload: Identifiable
     
     /// Instantiates ``DataSource`` instance. If the instance exists nothing is done.
     func initialize() async throws
@@ -19,25 +19,25 @@ public protocol MutableDataSource<Payload> {
     /// Deletes ``DataSource`` instance.
     func delete() async throws
     
-    /// Inserts a new``Payload`` instance.
+    /// Inserts a new``MutablePayload`` instance.
     /// - Parameter payload: the object being created in the source
-    func insert(_ payload: Payload) async throws
+    func insert(_ payload: MutablePayload) async throws
     
-    /// Updates a specific ``Payload`` instance. If the specific instance does not exist a new instance is inserted.
+    /// Updates a specific ``MutablePayload`` instance. If the specific instance does not exist a new instance is inserted.
     /// - Parameter payload: the object being updated in the source
-    func update(_ payload: Payload) async throws
+    func update(_ payload: MutablePayload) async throws
     
-    /// - Returns a specific ``Payload`` instance from source.
+    /// - Returns a specific ``MutablePayload`` instance from source.
     /// - Parameter id: identifier tied to the payload value fetched from source
-    func fetch(id: Payload.ID) async -> Result<Payload, Error>
+    func fetch(id: MutablePayload.ID) async -> Result<MutablePayload, Error>
     
-    /// - Returns Fetches all ``Payload`` instances from source.
-    func fetch() async -> Result<[Payload.ID: Payload], Error>
+    /// - Returns Fetches all ``MutablePayload`` instances from source.
+    func fetch() async -> Result<[MutablePayload.ID: MutablePayload], Error>
     
-    /// Removes a specific ``Payload`` from the source.
+    /// Removes a specific ``MutablePayload`` from the source.
     /// - Parameter id: identifier tied to the payload value removed from source
-    func remove(id: Payload.ID) async throws
+    func remove(id: MutablePayload.ID) async throws
     
-    /// Removes all ``Payload`` objects from the source, but does not delete the source instance.
+    /// Removes all ``MutablePayload`` objects from the source, but does not delete the source instance.
     func clear() async throws
 }
