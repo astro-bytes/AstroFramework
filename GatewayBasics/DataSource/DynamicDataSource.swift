@@ -18,5 +18,5 @@ public protocol DynamicDataSource<Payload> {
     /// Fetches the payload based on a set of arguments
     /// - Parameter arguments: the argument parameters that make the fetch specific or uniquely dynamic
     /// - Returns a result as a ``Payload`` or as an ``Error``
-    func fetch(_ arguments: Arguments) -> Result<Payload, Error>
+    func fetch(_ arguments: Arguments) async throws -> Payload
 }
