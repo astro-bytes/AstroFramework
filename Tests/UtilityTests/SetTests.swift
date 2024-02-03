@@ -8,9 +8,14 @@
 import XCTest
 
 final class SetTests: XCTestCase {
-
-    func test_ToArray() {
-        XCTFail("Implement")
+    func testAsArray() {
+        // Arrange
+        let inputSet: Set<Int> = [1, 2, 3, 4, 5]
+        
+        // Act
+        let resultArray = inputSet.asArray
+        
+        // Assert
+        XCTAssertEqual(resultArray.sorted(), [1, 2, 3, 4, 5]) // Ensure the array contains the same elements as the set
     }
-
 }

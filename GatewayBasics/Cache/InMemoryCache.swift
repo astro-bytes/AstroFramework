@@ -37,7 +37,7 @@ public class InMemoryCache<Payload>: Cacheable {
     }
     
     /// Time interval for the cache to live before it becomes stale/invalid in seconds.
-    private let lifetime: TimeInterval
+    let lifetime: TimeInterval
     
     /// Creates a datastore for the payload with an in-memory cache that is expirable.
     /// - Parameter lifetime: The time that the cache has to live before becoming expired.

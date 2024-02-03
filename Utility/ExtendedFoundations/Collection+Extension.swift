@@ -88,6 +88,17 @@ extension Collection {
         }
         return result
     }
+    
+    /// Returns the first element of a collection that is of the specified type `T`.
+    /// - Parameters:
+    ///   - type: The type to check for in the collection.
+    /// - Returns: The first element of type `T` in the collection, or `nil` if not found.
+    /// - Complexity: O(*n*), where *n* is the length of the collection.
+    public func first<T>(of type: T.Type) -> T? {
+        first { element in
+            element is T
+        } as? T
+    }
 }
 
 // MARK: Collection Whose Element is Identifiable

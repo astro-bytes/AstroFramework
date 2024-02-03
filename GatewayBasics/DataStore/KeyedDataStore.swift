@@ -16,7 +16,7 @@ public protocol KeyedDataStore<Element>: DataStore where Payload == [Element.ID:
     /// Retrieves an element from the data store by its ID.
     /// - Parameter id: The ID of the element to retrieve.
     /// - Returns: A result containing the element on success, or an error on failure.
-    func get(by id: Element.ID) -> DataResult<Payload.Element>
+    func get(by id: Element.ID) -> DataResult<Element>
     
     /// Sets or updates an element in the data store.
     /// - Parameter element: The element to be set or updated.
@@ -27,6 +27,10 @@ public protocol KeyedDataStore<Element>: DataStore where Payload == [Element.ID:
     func clear(by id: Element.ID)
     
     /// Clears an element from the data store.
-    /// - Parameter element: The element to clear.
-    func clear(by element: Element)
+    /// - Parameter id: The ID of the element to refresh.
+    func refresh(by id: Element.ID) async -> DataResult<Element>
+    
+    /// Clears an element from the data store.
+    /// - Parameter id: The ID of the element to refresh.
+    func refresh(by id: Element.ID)
 }

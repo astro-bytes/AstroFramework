@@ -8,13 +8,23 @@
 import XCTest
 
 final class ResultTests: XCTestCase {
-    
-    func test_Value() {
-        XCTFail("Implement")
+    func testValueProperty() {
+        let successResult: Result<Int, TestError> = .success(42)
+        XCTAssertEqual(successResult.value, 42)
+        
+        let failureResult: Result<Int, TestError> = .failure(TestError.genericError)
+        XCTAssertNil(failureResult.value)
     }
     
-    func test_Error() {
-        XCTFail("Implement")
+    func testErrorProperty() {
+        let successResult: Result<Int, TestError> = .success(42)
+        XCTAssertNil(successResult.error)
+        
+        let failureResult: Result<Int, TestError> = .failure(TestError.genericError)
+        XCTAssertEqual(failureResult.error, TestError.genericError)
     }
-    
+}
+
+enum TestError: Error, Equatable {
+    case genericError
 }

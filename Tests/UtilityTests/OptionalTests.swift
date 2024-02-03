@@ -8,12 +8,20 @@
 import XCTest
 
 final class OptionalTests: XCTestCase {
-
-    func test_IsNil() {
-        XCTFail("Implement")
+    
+    func testIsNil() {
+        let optionalValue: Int? = nil
+        XCTAssertTrue(optionalValue.isNil)
+        
+        let nonNilOptional: String? = "Hello"
+        XCTAssertFalse(nonNilOptional.isNil)
     }
     
-    func test_isNotNil() {
-        XCTFail("Implement")
+    func testIsNotNil() {
+        let optionalValue: Double? = 42.0
+        XCTAssertTrue(optionalValue.isNotNil)
+        
+        let nilOptional: Bool? = nil
+        XCTAssertFalse(nilOptional.isNotNil)
     }
 }
