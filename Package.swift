@@ -102,7 +102,10 @@ let package = Package(
         .plugin(
             name: "AutomatedAppVersioning",
             capability: .command(
-                intent: .custom(verb: "automated-app-versioning", description: "Automates the increment of the app version."),
+                intent: .custom(
+                    verb: "automated-app-versioning",
+                    description: "Automates the increment of the app version."
+                ),
                 permissions: [
                     .writeToPackageDirectory(reason: "Adds a version-info.xcconfig file.")
                 ]

@@ -29,7 +29,7 @@ final class AutomatedAppVersioningPlugin: CommandPlugin {
     
     // Calculated build number
     var buildNumber: Int {
-        // TODO: Calculate build number
+        // TODO: Calculate build number from somewhere this is really only important when building multiple test flight builds on the same branch
         0
     }
     
@@ -41,6 +41,10 @@ final class AutomatedAppVersioningPlugin: CommandPlugin {
     ///   - context: The plugin context.
     ///   - arguments: The command arguments.
     func performCommand(context: PluginContext, arguments: [String]) async throws {
+        try run(arguments: arguments)
+    }
+    
+    func run(arguments: [String]) throws {
         var argExtractor = ArgumentExtractor(arguments)
         
         // Extract the "test-flag" option if provided
@@ -242,6 +246,17 @@ final class AutomatedAppVersioningPlugin: CommandPlugin {
         return string
     }
 }
+
+#if canImport(XcodeProjectPlugin)
+import XcodeProjectPlugin
+
+extension AutomatedAppVersioningPlugin: XcodeCommandPlugin {
+    func performCommand(context: XcodePluginContext, arguments: [String]) throws {
+        try run(arguments: arguments)
+    }
+}
+
+#endif
 
 /// Struct representing a version tag.
 struct Tag: CustomStringConvertible {
