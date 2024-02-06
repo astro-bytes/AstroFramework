@@ -21,16 +21,24 @@ final class AutomatedAppVersioningPlugin: CommandPlugin {
     // Environment variables
     let environment = ProcessInfo.processInfo.environment
     
+    let formatter: DateFormatter = {
+        let formatting = DateFormatter()
+        formatting.dateFormat = "dd/MM/yyyy"
+        return formatting
+    }()
+    
     // Default test build flag
     var testFlag: String = "T"
     
     // Default hot fix flag
     var hotFixFlag: String = "HF"
     
+    // Default xcConfig file name
+    var xcConfigName: String = "version-info"
+    
     // Calculated build number
     var buildNumber: Int {
-        // TODO: Calculate build number from somewhere this is really only important when building multiple test flight builds on the same branch
-        0
+        Bundle.main.infoDictionary?["CFBundleVersion"] as? Int ?? 0
     }
     
     // MARK: - Command Execution
@@ -46,6 +54,11 @@ final class AutomatedAppVersioningPlugin: CommandPlugin {
     
     func run(arguments: [String]) throws {
         var argExtractor = ArgumentExtractor(arguments)
+        
+        // Extract the "config-name" option if provided
+        if let flag = argExtractor.extractOption(named: "config-name").first {
+            xcConfigName = flag
+        }
         
         // Extract the "test-flag" option if provided
         if let flag = argExtractor.extractOption(named: "test-flag").first {
@@ -107,10 +120,18 @@ final class AutomatedAppVersioningPlugin: CommandPlugin {
     ///   - buildNumber: The build number.
     func createConfig(appVersion: Tag, buildNumber: Int = 1) throws {
         let contents = """
+        //
+        // DO NOT DELETE auto generated from Automated App Versioning Plugin
+        //
+        // Created on \(formatter.string(from: .now))
+        //
+        
+        // Be sure to add `#import \(xcConfigName)` to the base application configuration file OR `\(xcConfigName)` to your project configuration.
+        // See https://github.com/astro-bytes/PackageDeal/tree/main/AutomatedAppVersioning#configuration for further instructions on how configurations are integrated into applications
         APP_VERSION=\(appVersion.description)
         BUILD_NUMBER=\(buildNumber)
         """
-        try contents.write(toFile: "version-info.xcconfig", atomically: true, encoding: .utf8)
+        try contents.write(toFile: "\(xcConfigName).xcconfig", atomically: true, encoding: .utf8)
     }
     
     // MARK: - Branch and Tag Analysis
@@ -255,7 +276,6 @@ extension AutomatedAppVersioningPlugin: XcodeCommandPlugin {
         try run(arguments: arguments)
     }
 }
-
 #endif
 
 /// Struct representing a version tag.
