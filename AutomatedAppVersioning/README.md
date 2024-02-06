@@ -4,7 +4,7 @@ AutomatedAppVersioning is an SPM plugin for automated app versioning during the 
 
 ## Table of Contents
 
-1. [Installation](#installation)
+1. [Integration](#integration)
 2. [Usage](#usage)
 3. [Configuration](#configuration)
 4. [Features](#features)
@@ -16,58 +16,72 @@ AutomatedAppVersioning is an SPM plugin for automated app versioning during the 
 10. [Credits](#credits)
 11. [Contact Information](#contact-information)
 
-## Installation
+## Integration
+### Xcode Project
 
-To install AutomatedAppVersioning as an SPM plugin, follow these steps:
-
-```bash
-$ swift build -c release
-$ cp -f .build/release/AutomatedAppVersioningPlugin /usr/local/bin
+### Swift Package
+Add the package as a dependency in Package.swift:
+```swift
+.package(url: "https://github.com/astro-bytes/PackageDeal.git", from: "1.0.0")
 ```
 
-Make sure to have Swift installed on your machine.
-
-## Usage
-
-After installation, you can use AutomatedAppVersioningPlugin by adding it as a build tool in your Swift project's Package.swift file:
-
+Add the plugin to the executable target (optional not recommended):
 ```swift
-import PackageDescription
+.plugin(name: "AutomatedAppVersioning", package: "PackageDeal")
+```
 
+Similarly like so
+```swift
 let package = Package(
-    name: "YourProject",
+    ...
+    dependencies: [
+        .package(url: "https://github.com/astro-bytes/PackageDeal.git", from: "1.0.0")
+    ],
     ...
     targets: [
-        ...
         .executableTarget(
-            name: "YourAppTarget",
-            ...
-            dependencies: [
-                .product(name: "PackagePlugin", package: "PackagePlugin"),
-                .product(name: "AutomatedAppVersioning", package: "AutomatedAppVersioningPlugin"),
+            name: "TestPackage",
+            plugins: [
+                .plugin(name: "AutomatedAppVersioning", package: "PackageDeal") // Optional & Not recommended
             ]
         ),
-    ]
+    ],
+    ...
 )
 ```
 
-Then, add the following script phase to your Xcode project:
+## Usage
+### Running from Xcode
+Run the Script by right clicking your package and selecting the command, providing arguments if desired, selecting run
+![image](https://github.com/astro-bytes/PackageDeal/assets/56183563/de737fb5-be39-4c7d-86bb-f3853e073724)
+![image](https://github.com/astro-bytes/PackageDeal/assets/56183563/d08dbfca-fced-4c7d-a215-45e2a236809f)
 
-```swift
-scripts/RunAutomatedAppVersioningPlugin.swift
+
+### Running from Terminal
+Navigate to the package or project's root then run
+```bash
+swift package automated-app-versioning
 ```
 
 ## Configuration
 
 AutomatedAppVersioningPlugin supports the following configuration options:
 
-- `test-flag`: Specify a custom flag for test builds.
-- `patch-branch-flag`: Specify a custom flag for hotfix branches.
+- `test-flag`: Specify a custom flag for test builds. Defualts to `T` when not provided.
+- `patch-branch-flag`: Specify a custom flag for hotfix branches. Defaults to `HF` when not provided.
+
+Default Flag Examples:
+```
+// git branch hot fix name
+HF-<branch name>
+
+// Test Tag
+T-<Major>.<Minor>.<Patch>
+```
 
 Example:
-
 ```bash
-$ swift run AutomatedAppVersioningPlugin --test-flag=TEST --patch-branch-flag=HOTFIX
+swift package automated-app-versioning --test-flag=TEST --patch-branch-flag=HOTFIX
 ```
 
 ## Features
