@@ -15,30 +15,48 @@ let package = Package(
     ],
     products: [
         // Products define the executables and libraries a package produces, making them visible to other packages.
+        
+        // MARK: Libraries
+        
         .library(
             name: "ConcreteBasics",
             targets: ["ConcreteBasics"]
         ),
         .library(
             name: "EntityBasics",
-            targets: ["EntityBasics"]),
+            targets: ["EntityBasics"]
+        ),
         .library(
             name: "GatewayBasics",
-            targets: ["GatewayBasics"]),
+            targets: ["GatewayBasics"]
+        ),
         .library(
             name: "Logger",
-            targets: ["Logger"]),
+            targets: ["Logger"]
+        ),
         .library(
             name: "UniversalUI",
-            targets: ["UniversalUI"]),
+            targets: ["UniversalUI"]
+        ),
         .library(
             name: "UseCaseBasics",
-            targets: ["UseCaseBasics"]),
+            targets: ["UseCaseBasics"]
+        ),
         .library(
             name: "Utility",
-            targets: ["Utility"]),
+            targets: ["Utility"]
+        ),
+        
+        // MARK: Plugins
+        
+        .plugin(
+            name: "AutomatedAppVersioning",
+            targets: ["AutomatedAppVersioning"]
+        ),
     ],
     targets: [
+        // MARK: Targets
+        
         // Targets are the basic building blocks of a package, defining a module or a test suite.
         // Targets can depend on other targets in this package and products from dependencies.
         .target(
@@ -73,14 +91,27 @@ let package = Package(
             name: "Utility",
             path: "Utility"
         ),
-        
         .target(
             name: "Mocks",
             dependencies: ["GatewayBasics", "UseCaseBasics"],
             path: "Mocks"
         ),
         
+        // MARK: Plugins
+        
+        .plugin(
+            name: "AutomatedAppVersioning",
+            capability: .command(
+                intent: .custom(verb: "automated-app-versioning", description: "Automates the increment of the app version."),
+                permissions: [
+                    .writeToPackageDirectory(reason: "Adds a version-info.xcconfig file.")
+                ]
+            ),
+            path: "AutomatedAppVersioning"
+        ),
+        
         // MARK: Test Targets
+        
         .testTarget(
             name: "EntityBasicsTests",
             dependencies: ["EntityBasics", "Mocks"]
