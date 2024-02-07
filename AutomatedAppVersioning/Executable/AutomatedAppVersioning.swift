@@ -1,75 +1,44 @@
 //
-//  AutomatedAppVersioningPlugin.swift
+//  AutomatedAppVersioning.swift
 //  AutomatedAppVersioning
 //
 //  Created by Porter McGary on 2/5/24.
 //
 
 import Foundation
-import PackagePlugin
 import RegexBuilder
+import ArgumentParser
 
 /// Plugin for automated app versioning during the build process.
 @main
-final class AutomatedAppVersioningPlugin: CommandPlugin {
-    
+public struct AutomatedAppVersioning: ParsableCommand {
     // MARK: - Properties
     
-    // URL for the Git executable
-    let gitURL = URL(filePath: "/usr/bin/git")
-    
-    // Environment variables
-    let environment = ProcessInfo.processInfo.environment
-    
-    let formatter: DateFormatter = {
-        let formatting = DateFormatter()
-        formatting.dateFormat = "dd/MM/yyyy"
-        return formatting
-    }()
+    private(set) var gitURL = URL(filePath: "/usr/bin/git")
     
     // Default test build flag
+    @Option(name: .shortAndLong, help: "Specify the flag used to identify a test tag.")
     var testFlag: String = "T"
     
     // Default hot fix flag
+    @Option(name: .shortAndLong, help: "Specify the flag used to identify a Hot Fix or BCR branch.")
     var hotFixFlag: String = "HF"
     
     // Default xcConfig file name
+    @Option(name: .shortAndLong, help: "Specify the name of the xcconfig file.")
     var xcConfigName: String = "version-info"
+    
+    @Option(name: .long)
+    var target: String = ""
     
     // Calculated build number
     var buildNumber: Int {
         Bundle.main.infoDictionary?["CFBundleVersion"] as? Int ?? 0
     }
     
-    // MARK: - Command Execution
+    public init() {}
     
-    /// Executes the versioning command with the provided context and arguments.
-    ///
-    /// - Parameters:
-    ///   - context: The plugin context.
-    ///   - arguments: The command arguments.
-    func performCommand(context: PluginContext, arguments: [String]) async throws {
-        try run(arguments: arguments)
-    }
-    
-    func run(arguments: [String]) throws {
-        var argExtractor = ArgumentExtractor(arguments)
-        
-        // Extract the "config-name" option if provided
-        if let flag = argExtractor.extractOption(named: "config-name").first {
-            xcConfigName = flag
-        }
-        
-        // Extract the "test-flag" option if provided
-        if let flag = argExtractor.extractOption(named: "test-flag").first {
-            testFlag = flag
-        }
-        
-        // Extract the "patch-branch-flag" option if provided
-        if let flag = argExtractor.extractOption(named: "patch-branch-flag").first {
-            hotFixFlag = flag
-        }
-        
+    public mutating func run() throws {
         // Check if the commit includes a tag
         guard let tag = try commitIncludesTag() else {
             try createWithoutTag()
@@ -119,6 +88,9 @@ final class AutomatedAppVersioningPlugin: CommandPlugin {
     ///   - appVersion: The app version.
     ///   - buildNumber: The build number.
     func createConfig(appVersion: Tag, buildNumber: Int = 1) throws {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "dd/MM/yyyy"
+        
         let contents = """
         //
         // DO NOT DELETE auto generated from Automated App Versioning Plugin
@@ -267,16 +239,6 @@ final class AutomatedAppVersioningPlugin: CommandPlugin {
         return string
     }
 }
-
-#if canImport(XcodeProjectPlugin)
-import XcodeProjectPlugin
-
-extension AutomatedAppVersioningPlugin: XcodeCommandPlugin {
-    func performCommand(context: XcodePluginContext, arguments: [String]) throws {
-        try run(arguments: arguments)
-    }
-}
-#endif
 
 /// Struct representing a version tag.
 struct Tag: CustomStringConvertible {

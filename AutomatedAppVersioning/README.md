@@ -105,8 +105,8 @@ This can be done in two ways.
 **2. Add Custom Values to Build Settings**
   - Navigate to the target's Build Settings that the plugin is used for. (Typically this would be your application Target but there can be more than one depending on your setup)
   - Filter by `Versioning`
-  - Replace the string valur for the `Current Project Version` with `$(APP_VERSION)`
-  - Replace the string valur for the `Marketing Version` with `$(BUILD_NUMBER)`
+  - Replace the string value for `Current Project Version` with `$(APP_VERSION)`
+  - Replace the string value for `Marketing Version` with `$(BUILD_NUMBER)`
 
 When done properly the value should reflect as the new version values.
 ![image](https://github.com/astro-bytes/PackageDeal/assets/56183563/5996de70-3090-4ed3-ad6f-150efebf0085)

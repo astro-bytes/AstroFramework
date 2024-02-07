@@ -50,9 +50,19 @@ let package = Package(
         // MARK: Plugins
         
         .plugin(
-            name: "AutomatedAppVersioning",
-            targets: ["AutomatedAppVersioning"]
+            name: "AutomatedAppVersioningCommand",
+            targets: ["AutomatedAppVersioningCommand"]
         ),
+        .plugin(
+            name: "AutomatedAppVersioningBuildTool",
+            targets: ["AutomatedAppVersioningBuildTool"]
+        )
+    ],
+    dependencies: [
+        .package(
+            url: "https://github.com/apple/swift-argument-parser",
+            from: "1.0.0"
+        )
     ],
     targets: [
         // MARK: Targets
@@ -97,10 +107,20 @@ let package = Package(
             path: "Mocks"
         ),
         
+        // MARK: Executable Targets
+        
+        .executableTarget(
+            name: "AutomatedAppVersioning",
+            dependencies: [
+                .product(name: "ArgumentParser", package: "swift-argument-parser")
+            ],
+            path: "AutomatedAppVersioning/Executable"
+        ),
+        
         // MARK: Plugins
         
         .plugin(
-            name: "AutomatedAppVersioning",
+            name: "AutomatedAppVersioningCommand",
             capability: .command(
                 intent: .custom(
                     verb: "automated-app-versioning",
@@ -110,7 +130,14 @@ let package = Package(
                     .writeToPackageDirectory(reason: "Adds a version-info.xcconfig file.")
                 ]
             ),
-            path: "AutomatedAppVersioning"
+            dependencies: ["AutomatedAppVersioning"],
+            path: "AutomatedAppVersioning/Command"
+        ),
+        .plugin(
+            name: "AutomatedAppVersioningBuildTool",
+            capability: .buildTool,
+            dependencies: ["AutomatedAppVersioning"],
+            path: "AutomatedAppVersioning/BuildTool"
         ),
         
         // MARK: Test Targets
