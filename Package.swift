@@ -56,7 +56,14 @@ let package = Package(
         .plugin(
             name: "AutomatedAppVersioningBuildTool",
             targets: ["AutomatedAppVersioningBuildTool"]
-        )
+        ),
+        
+        // MARK: Executables
+        
+        .executable(
+            name: "AutomatedAppVersioning",
+            targets: ["AutomatedAppVersioning"]
+        ),
     ],
     dependencies: [
         .package(
@@ -76,7 +83,10 @@ let package = Package(
         ),
         .target(
             name: "EntityBasics",
-            path: "EntityBasics"
+            path: "EntityBasics",
+            plugins: [
+                .plugin(name: "AutomatedAppVersioningBuildTool")
+            ]
         ),
         .target(
             name: "GatewayBasics",
@@ -136,7 +146,12 @@ let package = Package(
         .plugin(
             name: "AutomatedAppVersioningBuildTool",
             capability: .buildTool,
-            dependencies: ["AutomatedAppVersioning"],
+            dependencies: [
+                .target(
+                    name: "AutomatedAppVersioningBinary",
+                    condition: .when(platforms: [.macOS])
+                )
+            ],
             path: "AutomatedAppVersioning/BuildTool"
         ),
         
@@ -165,6 +180,13 @@ let package = Package(
         .testTarget(
             name: "UtilityTests",
             dependencies: ["Utility", "Mocks"]
-        )
+        ),
+        
+        // MARK: Binary Targets
+        
+        .binaryTarget(
+            name: "AutomatedAppVersioningBinary",
+            path: "AutomatedAppVersioning/Executable/versioning.artifactbundle"
+        ),
     ]
 )

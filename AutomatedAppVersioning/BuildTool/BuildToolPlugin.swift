@@ -11,12 +11,12 @@ import PackagePlugin
 @main
 struct VersioningBuildToolPlugin: BuildToolPlugin {
     func createBuildCommands(context: PluginContext, target: Target) async throws -> [Command] {
-        [
+        return [
             .prebuildCommand(
                 displayName: "Automated App Versioning",
                 executable: try context.tool(named: "AutomatedAppVersioning").path,
                 arguments: extractArguments(),
-                outputFilesDirectory: context.pluginWorkDirectory
+                outputFilesDirectory: context.package.directory
             )
         ]
     }
@@ -48,12 +48,12 @@ import XcodeProjectPlugin
 
 extension VersioningBuildToolPlugin: XcodeBuildToolPlugin {
     func createBuildCommands(context: XcodePluginContext, target: XcodeTarget) throws -> [Command] {
-        [
+        return [
             .prebuildCommand(
                 displayName: "Automated App Versioning",
                 executable: try context.tool(named: "AutomatedAppVersioning").path,
                 arguments: extractArguments(),
-                outputFilesDirectory: context.pluginWorkDirectory
+                outputFilesDirectory: context.xcodeProject.directory
             )
         ]
     }

@@ -38,7 +38,7 @@ public struct AutomatedAppVersioning: ParsableCommand {
     
     public init() {}
     
-    public mutating func run() throws {
+    public func run() throws {
         // Check if the commit includes a tag
         guard let tag = try commitIncludesTag() else {
             try createWithoutTag()
@@ -89,7 +89,7 @@ public struct AutomatedAppVersioning: ParsableCommand {
     ///   - buildNumber: The build number.
     func createConfig(appVersion: Tag, buildNumber: Int = 1) throws {
         let formatter = DateFormatter()
-        formatter.dateFormat = "dd/MM/yyyy"
+        formatter.dateFormat = "MM/dd/yyyy"
         
         let contents = """
         //
