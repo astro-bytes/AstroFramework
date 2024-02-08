@@ -14,9 +14,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "GatewayBasics"
-               BuildableName = "GatewayBasics"
-               BlueprintName = "GatewayBasics"
+               BlueprintIdentifier = "UtilityFoundation"
+               BuildableName = "UtilityFoundation"
+               BlueprintName = "UtilityFoundation"
                ReferencedContainer = "container:">
             </BuildableReference>
          </BuildActionEntry>
@@ -49,9 +49,9 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "GatewayBasics"
-            BuildableName = "GatewayBasics"
-            BlueprintName = "GatewayBasics"
+            BlueprintIdentifier = "UtilityFoundation"
+            BuildableName = "UtilityFoundation"
+            BlueprintName = "UtilityFoundation"
             ReferencedContainer = "container:">
          </BuildableReference>
       </MacroExpansion>
