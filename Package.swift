@@ -15,26 +15,57 @@ let package = Package(
     ],
     products: [
         // Products define the executables and libraries a package produces, making them visible to other packages.
+        
+        // MARK: Libraries
+        
         .library(
             name: "EntityBasics",
-            targets: ["EntityBasics"]),
+            targets: ["EntityBasics"]
+        ),
         .library(
             name: "GatewayBasics",
-            targets: ["GatewayBasics"]),
+            targets: ["GatewayBasics"]
+        ),
         .library(
             name: "Logger",
-            targets: ["Logger"]),
+            targets: ["Logger"]
+        ),
         .library(
             name: "UniversalUI",
-            targets: ["UniversalUI"]),
+            targets: ["UniversalUI"]
+        ),
         .library(
             name: "UseCaseBasics",
-            targets: ["UseCaseBasics"]),
+            targets: ["UseCaseBasics"]
+        ),
         .library(
             name: "Utility",
-            targets: ["Utility"]),
+            targets: ["Utility"]
+        ),
+        
+        // MARK: Plugins
+        
+        .plugin(
+            name: "AutomatedAppVersioningCommand",
+            targets: ["AutomatedAppVersioningCommand"]
+        ),
+        
+        // MARK: Executable
+        
+        .executable(
+            name: "AutomatedAppVersioning",
+            targets: ["AutomatedAppVersioning"]
+        ),
+    ],
+    dependencies: [
+        .package(
+            url: "https://github.com/apple/swift-argument-parser",
+            from: "1.0.0"
+        )
     ],
     targets: [
+        // MARK: Targets
+        
         // Targets are the basic building blocks of a package, defining a module or a test suite.
         // Targets can depend on other targets in this package and products from dependencies.
         .target(
@@ -64,14 +95,41 @@ let package = Package(
             name: "Utility",
             path: "Utility"
         ),
-        
         .target(
             name: "Mocks",
             dependencies: ["GatewayBasics", "UseCaseBasics"],
             path: "Mocks"
         ),
         
+        // MARK: Executable Targets
+        
+        .executableTarget(
+            name: "AutomatedAppVersioning",
+            dependencies: [
+                .product(name: "ArgumentParser", package: "swift-argument-parser")
+            ],
+            path: "AutomatedAppVersioning/Executable"
+        ),
+        
+        // MARK: Plugins
+        
+        .plugin(
+            name: "AutomatedAppVersioningCommand",
+            capability: .command(
+                intent: .custom(
+                    verb: "automated-app-versioning",
+                    description: "Automates the increment of the app version."
+                ),
+                permissions: [
+                    .writeToPackageDirectory(reason: "Adds a version-info.xcconfig file.")
+                ]
+            ),
+            dependencies: ["AutomatedAppVersioning"],
+            path: "AutomatedAppVersioning/Command"
+        ),
+        
         // MARK: Test Targets
+        
         .testTarget(
             name: "EntityBasicsTests",
             dependencies: ["EntityBasics", "Mocks"]
@@ -95,6 +153,6 @@ let package = Package(
         .testTarget(
             name: "UtilityTests",
             dependencies: ["Utility", "Mocks"]
-        )
+        ),
     ]
 )
