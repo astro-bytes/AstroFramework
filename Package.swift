@@ -53,10 +53,10 @@ let package = Package(
             name: "AutomatedAppVersioningCommand",
             targets: ["AutomatedAppVersioningCommand"]
         ),
-//        .plugin(
-//            name: "AutomatedAppVersioningBuildTool",
-//            targets: ["AutomatedAppVersioningBuildTool"]
-//        ),
+        .plugin(
+            name: "AutomatedAppVersioningBuildTool",
+            targets: ["AutomatedAppVersioningBuildTool"]
+        ),
         
         // MARK: Executables
         
@@ -140,18 +140,17 @@ let package = Package(
             dependencies: ["AutomatedAppVersioning"],
             path: "AutomatedAppVersioning/Command"
         ),
-        // TODO: Uncomment when file saving is allowed... this could be never
-//        .plugin(
-//            name: "AutomatedAppVersioningBuildTool",
-//            capability: .buildTool,
-//            dependencies: [
-//                .target(
-//                    name: "AutomatedAppVersioningBinary",
-//                    condition: .when(platforms: [.macOS])
-//                )
-//            ],
-//            path: "AutomatedAppVersioning/BuildTool"
-//        ),
+        .plugin(
+            name: "AutomatedAppVersioningBuildTool",
+            capability: .buildTool,
+            dependencies: [
+                .target(
+                    name: "AutomatedAppVersioningBinary",
+                    condition: .when(platforms: [.macOS])
+                )
+            ],
+            path: "AutomatedAppVersioning/BuildTool"
+        ),
         
         // MARK: Test Targets
         
@@ -182,10 +181,9 @@ let package = Package(
         
         // MARK: Binary Targets
         
-        // TODO: Uncomment with the BuildToolPlugin
-//        .binaryTarget(
-//            name: "AutomatedAppVersioningBinary",
-//            path: "AutomatedAppVersioning/Executable/versioning.artifactbundle"
-//        ),
+        .binaryTarget(
+            name: "AutomatedAppVersioningBinary",
+            path: "AutomatedAppVersioning/Executable/versioning.artifactbundle"
+        ),
     ]
 )
