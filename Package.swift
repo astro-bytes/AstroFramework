@@ -53,10 +53,10 @@ let package = Package(
             name: "AutomatedAppVersioningCommand",
             targets: ["AutomatedAppVersioningCommand"]
         ),
-        .plugin(
-            name: "AutomatedAppVersioningBuildTool",
-            targets: ["AutomatedAppVersioningBuildTool"]
-        ),
+//        .plugin(
+//            name: "AutomatedAppVersioningBuildTool",
+//            targets: ["AutomatedAppVersioningBuildTool"]
+//        ),
         
         // MARK: Executables
         
@@ -83,10 +83,7 @@ let package = Package(
         ),
         .target(
             name: "EntityBasics",
-            path: "EntityBasics",
-            plugins: [
-                .plugin(name: "AutomatedAppVersioningBuildTool")
-            ]
+            path: "EntityBasics"
         ),
         .target(
             name: "GatewayBasics",
@@ -143,17 +140,18 @@ let package = Package(
             dependencies: ["AutomatedAppVersioning"],
             path: "AutomatedAppVersioning/Command"
         ),
-        .plugin(
-            name: "AutomatedAppVersioningBuildTool",
-            capability: .buildTool,
-            dependencies: [
-                .target(
-                    name: "AutomatedAppVersioningBinary",
-                    condition: .when(platforms: [.macOS])
-                )
-            ],
-            path: "AutomatedAppVersioning/BuildTool"
-        ),
+        // TODO: Uncomment when file saving is allowed... this could be never
+//        .plugin(
+//            name: "AutomatedAppVersioningBuildTool",
+//            capability: .buildTool,
+//            dependencies: [
+//                .target(
+//                    name: "AutomatedAppVersioningBinary",
+//                    condition: .when(platforms: [.macOS])
+//                )
+//            ],
+//            path: "AutomatedAppVersioning/BuildTool"
+//        ),
         
         // MARK: Test Targets
         
@@ -184,9 +182,10 @@ let package = Package(
         
         // MARK: Binary Targets
         
-        .binaryTarget(
-            name: "AutomatedAppVersioningBinary",
-            path: "AutomatedAppVersioning/Executable/versioning.artifactbundle"
-        ),
+        // TODO: Uncomment with the BuildToolPlugin
+//        .binaryTarget(
+//            name: "AutomatedAppVersioningBinary",
+//            path: "AutomatedAppVersioning/Executable/versioning.artifactbundle"
+//        ),
     ]
 )
