@@ -71,4 +71,3 @@ final class EquatableErrorTests: XCTestCase {
         XCTAssertEqual(equatableError.base as NSError, baseError)
     }
 }
-

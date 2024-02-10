@@ -29,7 +29,7 @@ public protocol Repository {
     
     /// Asynchronously returns the current value of the data
     /// - Returns: The current state value of the data.
-    func get() async throws -> Payload
+    func get(within: TimeInterval) async throws -> Payload
     
     /// Sets the new value that is being updated.
     ///
@@ -40,33 +40,39 @@ public protocol Repository {
     func clear()
 }
 
+/// Extension providing an asynchronous method to retrieve the current value of the repository's data.
 extension Repository {
-    func get() async throws -> Payload {
+    /// Retrieves the current value of the repository's data asynchronously.
+    ///
+    /// This method subscribes to the repository's data stream, waits for the first non-loading value,
+    /// and returns it. If the data is uninitialized, it tries to refresh the data and returns the new value.
+    ///
+    /// - Returns: The current value of the repository's data.
+    /// - Throws: An error if the retrieval fails.
+    public func get(within timeout: TimeInterval = .to(seconds: 5)) async throws -> Payload {
         // With a subscription
         // Subscribe and take the first value
-        let result: DataResult<Payload> = try await data.first()
+        let result: DataResult<Payload> = try await data.first(timeoutAfter: timeout) { !$0.isLoading }
         
         switch result {
         case .uninitialized:
-            // This should not happen
-            throw CoreError.notFound
-//            let refreshedResult = await refresh()
-//            guard refreshedResult.error.isNotNil,
-//                  refreshedResult.isLoading == false,
-//                  let newPayload = refreshedResult.payload else {
-//                guard case .failure(_, let error) = refreshedResult else {
-//                    guard  refreshedResult.isLoading else {
-//                        // Uninitialized
-//                        throw CoreError.notFound
-//                    }
-//                    // Loading
-//                    throw CoreError.timeout
-//                }
-//                // Failed
-//                throw error
-//            }
-//            // Success
-//            return newPayload
+            let refreshedResult = await refresh()
+            guard refreshedResult.error.isNotNil,
+                  refreshedResult.isLoading == false,
+                  let newPayload = refreshedResult.payload else {
+                guard case .failure(_, let error) = refreshedResult else {
+                    guard  refreshedResult.isLoading else {
+                        // Uninitialized
+                        throw CoreError.notFound
+                    }
+                    // Loading
+                    throw CoreError.timeout
+                }
+                // Failed
+                throw error
+            }
+            // Success
+            return newPayload
         case .loading:
             // This should't happen
             throw CoreError.timeout
@@ -74,27 +80,6 @@ extension Repository {
             return data
         case .failure(_, let error):
             throw error
-        }
-    }
-}
-
-extension AnyPublisher {
-    func first(timeoutAfter time: TimeInterval = .to(seconds: 5), scheduler: DispatchQueue = DispatchQueue.main) async throws -> Output {
-        try await withCheckedThrowingContinuation { continuation in
-            var found = false
-            let cancellable = timeout(.seconds(time), scheduler: scheduler).sink { completion in
-                switch completion {
-                case .finished:
-                    if !found {
-                        continuation.resume(throwing: CoreError.timeout)
-                    }
-                case .failure(let error):
-                    continuation.resume(throwing: error)
-                }
-            } receiveValue: { value in
-                found = true
-                continuation.resume(returning: value)
-            }
         }
     }
 }

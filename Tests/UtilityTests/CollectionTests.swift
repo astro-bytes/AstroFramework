@@ -112,12 +112,8 @@ final class CollectionTests: XCTestCase {
     func testAsyncCompactMapWithThrowing() async {
         let input = [1, 2, 3, 4, 5]
         
-        do {
-            let result = try await input.asyncCompactMap { try? await asyncThrowingTransformation(element: $0) }
-            XCTAssertEqual(result, [TestType(value: 4), TestType(value: 8)])
-        } catch {
-            XCTFail("Unexpected error: \(error)")
-        }
+        let result = await input.asyncCompactMap { try? await asyncThrowingTransformation(element: $0) }
+        XCTAssertEqual(result, [TestType(value: 4), TestType(value: 8)])
     }
     
     // MARK: - asyncMap tests
@@ -133,12 +129,8 @@ final class CollectionTests: XCTestCase {
     func testAsyncMapWithThrowing() async {
         let input = [1, 2, 3, 4, 5]
         
-        do {
-            let result = await input.asyncMap { try? await asyncThrowingTransformation(element: $0)! }
-            XCTAssertEqual(result, [nil, TestType(value: 4), nil, TestType(value: 8), nil])
-        } catch {
-            XCTFail("Unexpected error: \(error)")
-        }
+        let result = await input.asyncMap { try? await asyncThrowingTransformation(element: $0)! }
+        XCTAssertEqual(result, [nil, TestType(value: 4), nil, TestType(value: 8), nil])
     }
     
     // MARK: - asyncReduce tests
