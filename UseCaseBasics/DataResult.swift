@@ -1,6 +1,6 @@
 //
 //  DataResult.swift
-//  GatewayBasics
+//  UseCaseBasics
 //
 //  Created by Porter McGary on 1/17/24.
 //
