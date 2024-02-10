@@ -11,4 +11,7 @@ import Foundation
 public enum CoreError: Error {
     /// Indicates that the requested item was not found.
     case notFound
+    
+    /// Indicates a timeout error.
+    case timeout
 }
