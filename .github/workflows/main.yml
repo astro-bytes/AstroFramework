@@ -16,6 +16,6 @@ jobs:
       - name: "Checkout Repo"
         uses: actions/checkout@v4
       - name: Build
-        run: swift build --build-tests --target ${{ matrix.module }}
+        run: swift build --target ${{ matrix.module }}
       - name: Test
         run: swift test --skip-build --test-product ${{ matrix.module }}
