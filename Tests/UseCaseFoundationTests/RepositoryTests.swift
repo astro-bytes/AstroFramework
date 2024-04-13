@@ -8,7 +8,7 @@
 import XCTest
 import Mocks
 @testable import UseCaseFoundation
-import Utility
+import UtilityFoundation
 
 class RepositoryTests: XCTestCase {
     

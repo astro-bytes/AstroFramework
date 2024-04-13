@@ -9,7 +9,7 @@ import XCTest
 import Combine
 import Mocks
 @testable import UseCaseFoundation
-import Utility
+import UtilityFoundation
 
 class KeyedRepositoryTests: XCTestCase {
     

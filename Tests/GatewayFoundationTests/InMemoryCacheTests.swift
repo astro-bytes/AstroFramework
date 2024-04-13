@@ -6,8 +6,8 @@
 //
 
 import XCTest
-@testable import GatewayBasics
-import Utility
+@testable import GatewayFoundation
+import UtilityFoundation
 import Mocks
 
 final class InMemoryCacheTests: XCTestCase {

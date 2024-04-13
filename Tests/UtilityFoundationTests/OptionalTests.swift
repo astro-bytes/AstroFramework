@@ -6,6 +6,7 @@
 //
 
 import XCTest
+@testable import UtilityFoundation
 
 final class OptionalTests: XCTestCase {
     

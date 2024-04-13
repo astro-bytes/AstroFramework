@@ -7,7 +7,7 @@
 
 import XCTest
 import Combine
-@testable import Utility // Import your module containing the AnyPublisher extension
+@testable import UtilityFoundation
 
 class AnyPublisherExtensionTests: XCTestCase {
     func testFirstExtension_SuccessfulCase() async throws {

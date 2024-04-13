@@ -7,7 +7,7 @@
 
 import XCTest
 import Combine
-@testable import Logger
+@testable import LoggerFoundation
 
 final class LoggerTests: XCTestCase {
     

@@ -6,7 +6,7 @@
 //
 
 import Mocks
-import Utility
+import UtilityFoundation
 import XCTest
 
 final class CollectionTests: XCTestCase {

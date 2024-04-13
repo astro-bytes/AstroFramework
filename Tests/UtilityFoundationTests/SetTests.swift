@@ -6,6 +6,7 @@
 //
 
 import XCTest
+@testable import UtilityFoundation
 
 final class SetTests: XCTestCase {
     func testAsArray() {

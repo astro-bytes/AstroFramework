@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import Logger
+import LoggerFoundation
 
 class MockInterceptor: Interceptor {
     @Published var interceptIsCalled = false

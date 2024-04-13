@@ -5,7 +5,7 @@
 //  Created by Porter McGary on 1/20/24.
 //
 
-@testable import Utility
+@testable import UtilityFoundation
 import XCTest
 
 final class EquatableErrorTests: XCTestCase {

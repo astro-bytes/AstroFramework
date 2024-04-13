@@ -6,8 +6,8 @@
 //
 
 import XCTest
-@testable import GatewayBasics
-import Logger
+@testable import GatewayFoundation
+import LoggerFoundation
 import Mocks
 
 final class OnDiskCacheTests: XCTestCase {
