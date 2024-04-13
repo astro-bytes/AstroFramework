@@ -1,12 +1,12 @@
 //
 //  KeyedRepository.swift
-//  UseCaseBasics
+//  UseCaseFoundation
 //
 //  Created by Porter McGary on 1/30/24.
 //
 
 import Foundation
-import Utility
+import UtilityFoundation
 
 /// Protocol defining a keyed repository, which extends the basic repository pattern and provides methods to interact with data elements using their identifiers.
 public protocol KeyedRepository<Element>: Repository {

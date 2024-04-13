@@ -7,8 +7,8 @@
 
 import Combine
 import Foundation
-import UseCaseBasics
-import Utility
+import UseCaseFoundation
+import UtilityFoundation
 
 /// Interface that follows the Repository Pattern.
 /// This structurally provides a way to access data from an underlying ``DataStore`` in a uniform way.

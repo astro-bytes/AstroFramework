@@ -9,7 +9,7 @@ jobs:
     name: Module ${{ matrix.module }}
     strategy:
       matrix:
-        modlue: ["EntityFoundation", "UseCaseFoundation", "GatewayFoundation"]
+        modlue: ["EntityFoundation", "UseCaseFoundation", "GatewayFoundation", "LoggerFoundation", "UIFoundation", "UtilityFoundation"]
     runs-on: [self-hosted]
     steps:
       - name: "Checkout Repo"

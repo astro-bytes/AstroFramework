@@ -1,6 +1,6 @@
 //
 //  KeyedRepositoryTests.swift
-//  UseCaseBasicsTests
+//  UseCaseFoundationTests
 //
 //  Created by Porter McGary on 2/9/24.
 //
@@ -8,7 +8,7 @@
 import XCTest
 import Combine
 import Mocks
-@testable import UseCaseBasics
+@testable import UseCaseFoundation
 import Utility
 
 class KeyedRepositoryTests: XCTestCase {

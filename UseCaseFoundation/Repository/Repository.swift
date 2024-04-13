@@ -1,14 +1,14 @@
 //
 //  Repository.swift
-//  UseCaseBasics
+//  UseCaseFoundation
 //
 //  Created by Porter McGary on 1/16/24.
 //
 
 import Foundation
 import Combine
-import EntityBasics
-import Utility
+import EntityFoundation
+import UtilityFoundation
 
 /// Interface that follows the Repository Pattern.
 ///

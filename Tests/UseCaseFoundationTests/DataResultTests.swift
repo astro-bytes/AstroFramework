@@ -1,11 +1,11 @@
 //
 //  DataResultTests.swift
-//  UseCaseBasicsTests
+//  UseCaseFoundationTests
 //
 //  Created by Porter McGary on 1/20/24.
 //
 
-@testable import UseCaseBasics
+@testable import UseCaseFoundation
 import XCTest
 
 final class DataResultTests: XCTestCase {

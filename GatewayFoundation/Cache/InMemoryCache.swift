@@ -7,7 +7,7 @@
 
 import Combine
 import Foundation
-import UseCaseBasics
+import UseCaseFoundation
 
 /// A class representing an in-memory cache with expirable data.
 /// This cache allows you to store and retrieve data with a specified expiration time.

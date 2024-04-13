@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import UseCaseBasics
+import UseCaseFoundation
 
 /// A protocol for a keyed data store, where elements are uniquely identified by their ID.
 public protocol KeyedDataStore<Element>: DataStore where Payload == [Element.ID: Element] {

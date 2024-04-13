@@ -8,7 +8,7 @@
 import Combine
 import Foundation
 import GatewayBasics
-import UseCaseBasics
+import UseCaseFoundation
 
 // Get the Local user info
 public class MockRepository<Payload>: Repository {
@@ -31,7 +31,7 @@ public class MockRepository<Payload>: Repository {
         calledRefresh = true
     }
     
-    public func refresh() async -> UseCaseBasics.DataResult<Payload> {
+    public func refresh() async -> UseCaseFoundation.DataResult<Payload> {
         calledAsyncRefresh = true
         return publisher.value
     }

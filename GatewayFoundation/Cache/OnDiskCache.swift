@@ -6,9 +6,9 @@
 //
 
 import Foundation
-import Logger
-import UseCaseBasics
-import Utility
+import LoggerFoundation
+import UseCaseFoundation
+import UtilityFoundation
 
 /// A class representing an on-disk cache with expirable data, inheriting from `InMemoryCache`.
 /// This cache persists data on disk, allowing for retrieval even after the application restarts.

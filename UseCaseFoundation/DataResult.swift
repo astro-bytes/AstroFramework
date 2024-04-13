@@ -1,12 +1,12 @@
 //
 //  DataResult.swift
-//  UseCaseBasics
+//  UseCaseFoundation
 //
 //  Created by Porter McGary on 1/17/24.
 //
 
 import Foundation
-import Utility
+import UtilityFoundation
 
 /// Represents the result of an asynchronous data operation.
 public enum DataResult<Payload> {

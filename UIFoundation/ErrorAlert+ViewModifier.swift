@@ -6,8 +6,8 @@
 //
 
 import SwiftUI
-import Logger
-import Utility
+import LoggerFoundation
+import UtilityFoundation
 
 private struct ErrorAlertViewModifier: ViewModifier {
     

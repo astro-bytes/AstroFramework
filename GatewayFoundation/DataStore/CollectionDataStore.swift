@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import UseCaseBasics
+import UseCaseFoundation
 
 /// A protocol for a data store with a collection payload, where elements are uniquely identified by their ID.
 public protocol CollectionDataStore<Payload>: DataStore where Payload: Collection, Payload.Element: Identifiable {

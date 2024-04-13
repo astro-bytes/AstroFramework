@@ -7,7 +7,7 @@
 
 import Combine
 import Foundation
-import UseCaseBasics
+import UseCaseFoundation
 
 /// A protocol defining the interface for a data cache.
 public protocol Cacheable<Payload> {
