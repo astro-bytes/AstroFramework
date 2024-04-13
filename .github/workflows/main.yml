@@ -6,7 +6,7 @@ on:
 
 jobs:
   build:
-    name: Module ${{ matrix.module }}
+    name: ${{ matrix.module }} Module Build & Tests
     strategy:
       fail-fast: false
       matrix:
