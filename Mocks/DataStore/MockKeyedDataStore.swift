@@ -7,7 +7,7 @@
 
 import Foundation
 import Combine
-import UseCaseBasics
+import UseCaseFoundation
 import GatewayBasics
 import Utility
 
@@ -27,7 +27,7 @@ public class MockKeyedDataStore<Element: Identifiable>: KeyedDataStore {
     
     let subject: CurrentValueSubject<DataResult<Payload>, Never>
     
-    public var data: AnyPublisher<UseCaseBasics.DataResult<Payload>, Never> {
+    public var data: AnyPublisher<UseCaseFoundation.DataResult<Payload>, Never> {
         subject.eraseToAnyPublisher()
     }
     
@@ -47,12 +47,12 @@ public class MockKeyedDataStore<Element: Identifiable>: KeyedDataStore {
         calledRefresh = true
     }
     
-    public func refresh() async -> UseCaseBasics.DataResult<Payload> {
+    public func refresh() async -> UseCaseFoundation.DataResult<Payload> {
         calledAsyncRefresh = true
         return subject.value
     }
     
-    public func refresh(by id: Element.ID) async -> UseCaseBasics.DataResult<Element> {
+    public func refresh(by id: Element.ID) async -> UseCaseFoundation.DataResult<Element> {
         calledAsyncRefreshByID = true
         return get(by: id)
     }

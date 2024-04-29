@@ -1,0 +1,21 @@
+name: Build Package
+
+on: 
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    name: ${{ matrix.module }} Module Build & Tests
+    strategy:
+      fail-fast: false
+      matrix:
+        module: [EntityFoundation, UseCaseFoundation, GatewayFoundation, LoggerFoundation, UIFoundation, UtilityFoundation]
+    runs-on: [self-hosted]
+    steps:
+      - name: "Checkout Repo"
+        uses: actions/checkout@v4
+      - name: Build
+        run: swift build --target ${{ matrix.module }}
+      - name: Test
+        run: swift test --test-product ${{ matrix.module }}

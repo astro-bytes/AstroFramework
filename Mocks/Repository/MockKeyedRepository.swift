@@ -7,7 +7,7 @@
 
 import Combine
 import Foundation
-import UseCaseBasics
+import UseCaseFoundation
 
 public class MockKeyedRepository<Element: Identifiable>: KeyedRepository {
     public typealias Payload = [Element.ID: Element]
@@ -20,7 +20,7 @@ public class MockKeyedRepository<Element: Identifiable>: KeyedRepository {
     var calledClearByID = false
     
     let subject: CurrentValueSubject<DataResult<Payload>, Never>
-    public var data: AnyPublisher<UseCaseBasics.DataResult<[Element.ID : Element]>, Never> {
+    public var data: AnyPublisher<UseCaseFoundation.DataResult<[Element.ID : Element]>, Never> {
         subject.eraseToAnyPublisher()
     }
     
@@ -46,7 +46,7 @@ public class MockKeyedRepository<Element: Identifiable>: KeyedRepository {
         calledRefresh = true
     }
     
-    public func refresh() async -> UseCaseBasics.DataResult<[Element.ID : Element]> {
+    public func refresh() async -> UseCaseFoundation.DataResult<[Element.ID : Element]> {
         calledAsyncRefresh = true
         return subject.value
     }

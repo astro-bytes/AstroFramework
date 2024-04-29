@@ -4,7 +4,7 @@
 import PackageDescription
 
 let package = Package(
-    name: "PackageDeal",
+    name: "AstroFramework",
     platforms: [
         .macOS(.v14),
         .iOS(.v17),
@@ -16,85 +16,85 @@ let package = Package(
     products: [
         // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(
-            name: "EntityBasics",
-            targets: ["EntityBasics"]),
+            name: "EntityFoundation",
+            targets: ["EntityFoundation"]),
         .library(
-            name: "GatewayBasics",
-            targets: ["GatewayBasics"]),
+            name: "GatewayFoundation",
+            targets: ["GatewayFoundation"]),
         .library(
-            name: "Logger",
-            targets: ["Logger"]),
+            name: "LoggerFoundation",
+            targets: ["LoggerFoundation"]),
         .library(
-            name: "UniversalUI",
-            targets: ["UniversalUI"]),
+            name: "UIFoundation",
+            targets: ["UIFoundation"]),
         .library(
-            name: "UseCaseBasics",
-            targets: ["UseCaseBasics"]),
+            name: "UseCaseFoundation",
+            targets: ["UseCaseFoundation"]),
         .library(
-            name: "Utility",
-            targets: ["Utility"]),
+            name: "UtilityFoundation",
+            targets: ["UtilityFoundation"]),
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
         // Targets can depend on other targets in this package and products from dependencies.
         .target(
-            name: "EntityBasics",
-            path: "EntityBasics"
+            name: "EntityFoundation",
+            path: "EntityFoundation"
         ),
         .target(
-            name: "GatewayBasics",
-            dependencies: ["Logger", "Utility", "UseCaseBasics"],
-            path: "GatewayBasics"
+            name: "GatewayFoundation",
+            dependencies: ["LoggerFoundation", "UtilityFoundation", "UseCaseFoundation"],
+            path: "GatewayFoundation"
         ),
         .target(
-            name: "Logger",
-            path: "Logger"
+            name: "LoggerFoundation",
+            path: "LoggerFoundation"
         ),
         .target(
-            name: "UniversalUI",
-            dependencies: ["Logger", "Utility"],
-            path: "UniversalUI"
+            name: "UIFoundation",
+            dependencies: ["LoggerFoundation", "UtilityFoundation"],
+            path: "UIFoundation"
         ),
         .target(
-            name: "UseCaseBasics",
-            dependencies: ["EntityBasics"],
-            path: "UseCaseBasics"
+            name: "UseCaseFoundation",
+            dependencies: ["EntityFoundation"],
+            path: "UseCaseFoundation"
         ),
         .target(
-            name: "Utility",
-            path: "Utility"
+            name: "UtilityFoundation",
+            path: "UtilityFoundation"
         ),
         
         .target(
             name: "Mocks",
-            dependencies: ["GatewayBasics", "UseCaseBasics"],
+            dependencies: ["GatewayFoundation", "UseCaseFoundation"],
             path: "Mocks"
         ),
         
         // MARK: Test Targets
         .testTarget(
-            name: "EntityBasicsTests",
-            dependencies: ["EntityBasics", "Mocks"]
+            name: "EntityFoundationTests",
+            dependencies: ["EntityFoundation", "Mocks"]
         ),
         .testTarget(
-            name: "GatewayBasicsTests",
-            dependencies: ["GatewayBasics", "Mocks"]
+            name: "GatewayFoundationTests",
+            dependencies: ["GatewayFoundation", "Mocks"]
         ),
         .testTarget(
-            name: "LoggerTests",
-            dependencies: ["Logger", "Mocks"]
+            name: "LoggerFoundationTests",
+            dependencies: ["LoggerFoundation", "Mocks"]
         ),
         .testTarget(
-            name: "UniversalUITests",
-            dependencies: ["UniversalUI", "Mocks"]
+            name: "UIFoundationTests",
+            dependencies: ["UIFoundation", "Mocks"]
         ),
         .testTarget(
-            name: "UseCaseBasicsTests",
-            dependencies: ["UseCaseBasics", "Mocks"]
+            name: "UseCaseFoundationTests",
+            dependencies: ["UseCaseFoundation", "Mocks"]
         ),
         .testTarget(
-            name: "UtilityTests",
-            dependencies: ["Utility", "Mocks"]
+            name: "UtilityFoundationTests",
+            dependencies: ["UtilityFoundation", "Mocks"]
         )
     ]
 )
