@@ -1,12 +1,11 @@
 //
-//  File.swift
-//  
+//  UseCase.swift
+//
 //
 //  Created by Porter McGary on 5/13/24.
 //
 
 import Foundation
-
 
 /// A protocol representing a synchronous use case.
 /// Conforming types must implement the `execute` method to perform the use case operation synchronously.
