@@ -73,7 +73,12 @@ struct ErrorAlertViewModifier: ViewModifier {
                 }
                 
                 if reportable, let report {
-                    Button("Report", role: .destructive, action: { report(error) })
+                    Button("Report", role: .destructive, action: {
+                        report(error)
+                        if let actionError = error as? ActionableError {
+                            actionError.perform()
+                        }
+                    })
                 }
                 
                 if dismissible {
