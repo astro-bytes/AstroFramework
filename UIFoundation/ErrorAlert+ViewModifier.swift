@@ -56,6 +56,15 @@ struct ErrorAlertViewModifier: ViewModifier {
         }
     }
     
+    var reportable: Bool {
+        switch error {
+        case let displayableError as DisplayableError:
+            displayableError.reportable
+        default:
+            report.isNotNil
+        }
+    }
+    
     func body(content: Content) -> some View {
         if let error {
             content.alert(title, isPresented: isPresented) {
@@ -63,7 +72,7 @@ struct ErrorAlertViewModifier: ViewModifier {
                     Button(actionError.label, action: actionError.perform)
                 }
                 
-                if let report {
+                if reportable, let report {
                     Button("Report", role: .destructive, action: { report(error) })
                 }
                 
