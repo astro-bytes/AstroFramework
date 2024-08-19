@@ -47,6 +47,15 @@ struct ErrorAlertViewModifier: ViewModifier {
         }
     }
     
+    var dismissible: Bool {
+        switch error {
+        case let displayableError as DisplayableError:
+            displayableError.dismissible
+        default:
+            true
+        }
+    }
+    
     func body(content: Content) -> some View {
         if let error {
             content.alert(title, isPresented: isPresented) {
@@ -58,7 +67,9 @@ struct ErrorAlertViewModifier: ViewModifier {
                     Button("Report", role: .destructive, action: { report(error) })
                 }
                 
-                Button("OK", role: .cancel, action: {})
+                if dismissible {
+                    Button("OK", role: .cancel, action: {})
+                }
             } message: {
                 if let body {
                     Text(body)

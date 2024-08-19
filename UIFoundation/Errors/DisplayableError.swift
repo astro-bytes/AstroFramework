@@ -11,4 +11,9 @@ import Foundation
 public protocol DisplayableError: LocalizedError {
     var title: String { get }
     var message: String? { get }
+    var dismissible: Bool { get }
+}
+
+public extension DisplayableError {
+    var dismissible: Bool { true }
 }
