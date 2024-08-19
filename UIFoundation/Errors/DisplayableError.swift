@@ -14,6 +14,6 @@ public protocol DisplayableError: LocalizedError {
     var dismissible: Bool { get }
 }
 
-public extension DisplayableError {
-    var dismissible: Bool { true }
+extension DisplayableError {
+    public var dismissible: Bool { true }
 }
