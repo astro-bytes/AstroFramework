@@ -69,7 +69,8 @@ struct ErrorAlertViewModifier: ViewModifier {
         if let error {
             content.alert(title, isPresented: isPresented) {
                 if let actionError = error as? ActionableError {
-                    Button(actionError.label, action: actionError.perform)
+                    let role: ButtonRole? = reportable && !dismissible ? .cancel : nil
+                    Button(actionError.label, role: role, action: actionError.perform)
                 }
                 
                 if reportable, let report {
