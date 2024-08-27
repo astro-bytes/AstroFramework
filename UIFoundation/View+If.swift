@@ -33,4 +33,15 @@ extension View {
             self
         }
     }
+    
+    // TODO: Add Comments
+    // TODO: Test that this works appropriately
+    // TODO: Make Public if this works right
+    @ViewBuilder func `if`<Argument>(_ args: Argument?..., @ViewBuilder transform: (Self, [Argument]) -> some View) -> some View {
+        if args.allSatisfy({ $0.isNotNil }) {
+            transform(self, args.compactMap { $0 })
+        } else {
+            self
+        }
+    }
 }

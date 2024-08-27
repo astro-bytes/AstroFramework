@@ -9,20 +9,13 @@ import SwiftUI
 import LoggerFoundation
 import UtilityFoundation
 
-private struct ErrorAlertViewModifier: ViewModifier {
+struct ErrorAlertViewModifier: ViewModifier {
     
     @Environment(\.reportError) var report
-    
     @Binding var error: Error?
-    let retry: (() -> Void)?
     
-    init(error: Binding<Error?>, retry: (() -> Void)? = nil) {
+    init(error: Binding<Error?>) {
         self._error = error
-        self.retry = retry
-    }
-    
-    init(error: Binding<Error?>, asyncRetry: @escaping () async -> Void) {
-        self.init(error: error) { Task { await asyncRetry() } }
     }
     
     var isPresented: Binding<Bool> {
@@ -34,52 +27,76 @@ private struct ErrorAlertViewModifier: ViewModifier {
         }
     }
     
+    var title: String {
+        switch error {
+        case let displayError as DisplayableError:
+            displayError.title
+        default:
+            "Error"
+        }
+    }
+    
+    var body: String? {
+        switch error {
+        case let displayError as DisplayableError:
+            displayError.message
+        case let localError as LocalizedError:
+            localError.recoverySuggestion
+        default:
+            "Sorry, something went wrong. Please try again later."
+        }
+    }
+    
+    var dismissible: Bool {
+        switch error {
+        case let displayableError as DisplayableError:
+            displayableError.dismissible
+        default:
+            true
+        }
+    }
+    
+    var reportable: Bool {
+        switch error {
+        case let displayableError as DisplayableError:
+            displayableError.reportable
+        default:
+            report.isNotNil
+        }
+    }
+    
     func body(content: Content) -> some View {
-        // if the error is localized then display the localized error's recovery suggestion
-        if let localizedError = error as? LocalizedError {
-            content.alert("Error", isPresented: isPresented) {
-                if let retry {
-                    Button("Retry", action: retry)
+        if let error {
+            content.alert(title, isPresented: isPresented) {
+                if let actionError = error as? ActionableError {
+                    let role: ButtonRole? = reportable && !dismissible ? .cancel : nil
+                    Button(actionError.label, role: role, action: actionError.perform)
                 }
                 
-                if localizedError.recoverySuggestion.isNil, let report {
-                    Button("Report", role: .destructive, action: { report(localizedError) })
+                if reportable, let report {
+                    Button("Report", role: .destructive, action: {
+                        report(error)
+                        if let actionError = error as? ActionableError {
+                            actionError.perform()
+                        }
+                    })
                 }
                 
-                Button("OK", role: .cancel, action: {})
-            } message: {
-                Text(localizedError.recoverySuggestion ??
-                     "Recovery Suggestion Required - Inform Development Team - \(String(describing: localizedError))")
-            }
-        } else if let error {
-            content
-                .alert("Error", isPresented: isPresented) {
-                    if let retry {
-                        Button("Retry", action: retry)
-                    }
-                    
-                    if let report {
-                        Button("Report", role: .destructive, action: { report(error) })
-                    }
-                    
+                if dismissible {
                     Button("OK", role: .cancel, action: {})
-                } message: {
-                    Text("Something went wrong and we don't know what happened.")
                 }
-                .onAppear {
-                    Logger.log(
-                        .critical,
-                        // swiftlint:disable:next line_length
-                        msg: "Failed to present \(String(describing: error)) because error is not of type LocalizedError",
-                        domain: "UniversalUI")
+            } message: {
+                if let body {
+                    Text(body)
                 }
+            }
         } else {
             content
         }
     }
 }
 
-private struct ReportErrorEnvironmentKey: EnvironmentKey {
+struct ReportErrorEnvironmentKey: EnvironmentKey {
     static var defaultValue: ((Error) -> Void)?
 }
 
@@ -91,37 +108,35 @@ extension EnvironmentValues {
     }
 }
 
-extension View {
+public extension View {
     /// Presents an alert dialog when an error occurs.
     /// - Parameters:
     ///   - error: Binded value when not nil presents the error and provides the error itself and is return to nil on dismiss
-    ///   - retry: A function that is defaulted to nil but when provided with a definition will call when the user presses the retry button. When nil the retry button is not displayed
     ///
     ///  ## Report button
     /// Additionally use the `.reportError(_:)` function to perform an action when the user presses the report button on the dialog.
     /// If this environment value is not provided no reporting is done ad no report button is shown
     // TODO: Add Example
-    public func errorAlert(error: Binding<Error?>, retry: (() -> Void)? = nil) -> some View {
-        modifier(ErrorAlertViewModifier(error: error, retry: retry))
+    func errorAlert(error: Binding<Error?>) -> some View {
+        modifier(ErrorAlertViewModifier(error: error))
     }
     
-    /// Presents an alert dialog when an error occurs. with an asynchronous retry
-    /// - Parameters:
-    ///   - error: Binded value when not nil presents the error and provides the error itself and is return to nil on dismiss
-    ///   - retry: A function that is defaulted to nil but when provided with a definition will call when the user presses the retry button. When nil the retry button is not displayed
-    ///
-    ///  ## Report button
-    /// Additionally use the `.reportError(_:)` function to perform an action when the user presses the report button on the dialog.
-    /// If this environment value is not provided no reporting is done ad no report button is shown
+    @available(*, deprecated)
+    func errorAlert(error: Binding<Error?>, retry: (() -> Void)? = nil) -> some View {
+        modifier(ErrorAlertViewModifier(error: error))
+    }
+    
     // TODO: Add Example
-    public func errorAlert(error: Binding<Error?>, asyncRetry: @escaping () async -> Void) -> some View {
-        modifier(ErrorAlertViewModifier(error: error, asyncRetry: asyncRetry))
+    @available(*, deprecated)
+    func errorAlert(error: Binding<Error?>, asyncRetry: @escaping () async -> Void) -> some View {
+        modifier(ErrorAlertViewModifier(error: error))
     }
     
     /// Adds an environment variable that is called when needing to report an error
     /// - Parameter action: the functionality provided when reporting an error
     // TODO: Add Example
-    public func reportError(_ action: @escaping (Error) -> Void) -> some View {
+    func reportError(_ action: @escaping (Error) -> Void) -> some View {
         environment(\.reportError, action)
     }
 }
+
