@@ -73,6 +73,11 @@ struct ErrorAlertViewModifier: ViewModifier {
                     Button(actionError.label, role: role, action: actionError.perform)
                 }
                 
+                if let actionError = error as? AsyncActionableError {
+                    let role: ButtonRole? = reportable && !dismissible ? .cancel : nil
+                    AsyncButton(actionError.label, role: role, action: actionError.perform)
+                }
+                
                 if reportable, let report {
                     Button("Report", role: .destructive, action: {
                         report(error)
