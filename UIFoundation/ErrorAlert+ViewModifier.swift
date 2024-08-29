@@ -70,19 +70,37 @@ struct ErrorAlertViewModifier: ViewModifier {
             content.alert(title, isPresented: isPresented) {
                 if let actionError = error as? ActionableError {
                     let role: ButtonRole? = reportable && !dismissible ? .cancel : nil
-                    Button(actionError.label, role: role, action: actionError.perform)
+                    Button(actionError.label, role: role) {
+                        do {
+                            try actionError.perform()
+                        } catch {
+                            self.error = error
+                        }
+                    }
                 }
                 
                 if let actionError = error as? AsyncActionableError {
                     let role: ButtonRole? = reportable && !dismissible ? .cancel : nil
-                    AsyncButton(actionError.label, role: role, action: actionError.perform)
+                    Button(actionError.label, role: role) {
+                        Task { @MainActor in
+                            do {
+                                try await actionError.perform()
+                            } catch {
+                                self.error = error
+                            }
+                        }
+                    }
                 }
                 
                 if reportable, let report {
                     Button("Report", role: .destructive, action: {
                         report(error)
                         if let actionError = error as? ActionableError {
-                            actionError.perform()
+                            do {
+                                try actionError.perform()
+                            } catch {
+                                self.error = error
+                            }
                         }
                     })
                 }
