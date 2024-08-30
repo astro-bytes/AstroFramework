@@ -7,7 +7,7 @@
 
 import Combine
 import Foundation
-import GatewayBasics
+import GatewayFoundation
 import UseCaseFoundation
 
 // Get the Local user info

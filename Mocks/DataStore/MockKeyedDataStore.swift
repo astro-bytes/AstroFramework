@@ -8,8 +8,8 @@
 import Foundation
 import Combine
 import UseCaseFoundation
-import GatewayBasics
-import Utility
+import GatewayFoundation
+import UtilityFoundation
 
 public class MockKeyedDataStore<Element: Identifiable>: KeyedDataStore {
     public typealias Payload = [Element.ID: Element]

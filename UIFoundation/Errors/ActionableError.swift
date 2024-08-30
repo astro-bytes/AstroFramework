@@ -11,5 +11,5 @@ import Foundation
 public protocol ActionableError: DisplayableError {
     var label: String { get }
     
-    func perform() -> Void
+    func perform() throws -> Void
 }

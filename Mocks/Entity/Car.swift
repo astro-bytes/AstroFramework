@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import EntityBasics
+import EntityFoundation
 
 public struct Car: Entity, Codable {
     public var id: UUID
