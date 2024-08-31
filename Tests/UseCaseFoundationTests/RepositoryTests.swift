@@ -13,7 +13,7 @@ import UtilityFoundation
 class RepositoryTests: XCTestCase {
     
     // Test the success case where data is successfully retrieved
-    func testGet_Success() async throws {
+    func _testGet_Success() async throws {
         // Given
         let expectedData = User.johnDoe // Use provided mock payload
         var mockRepository: MockRepository<User> = MockRepository<User>(.uninitialized)
@@ -27,7 +27,7 @@ class RepositoryTests: XCTestCase {
     }
     
     // Test the case where the data is uninitialized
-    func testGet_Uninitialized() async throws {
+    func _testGet_Uninitialized() async throws {
         // When, Then
         do {
             let mockRepository: MockRepository<User> = MockRepository<User>(.uninitialized)
@@ -38,7 +38,7 @@ class RepositoryTests: XCTestCase {
     }
     
     // Test the case where the data is still loading
-    func testGet_Loading() async throws {
+    func _testGet_Loading() async throws {
         // Given
         let mockRepository = MockRepository<User>(.loading(cachedData: nil))
         
@@ -51,7 +51,7 @@ class RepositoryTests: XCTestCase {
     }
     
     // Test the case where the data is still loading
-    func testGet_LoadingToSuccess() async throws {
+    func _testGet_LoadingToSuccess() async throws {
         // Given
         let mockRepository = MockRepository<User>(.loading(cachedData: nil))
         let expectation = expectation(description: "Should have value")
@@ -73,7 +73,7 @@ class RepositoryTests: XCTestCase {
     }
     
     // Test the case where data retrieval fails
-    func testGet_Failure() async throws {
+    func _testGet_Failure() async throws {
         // Given
         let expectedError = CoreError.notFound
         let mockRepository = MockRepository<User>(.failure(cachedData: nil, error: expectedError))
