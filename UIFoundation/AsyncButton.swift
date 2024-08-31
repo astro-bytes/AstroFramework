@@ -41,7 +41,3 @@ public struct AsyncButton<Label: View>: View {
         .errorAlert(error: $error)
     }
 }
-
-#Preview {
-    AsyncButton("Example", action: {})
-}
