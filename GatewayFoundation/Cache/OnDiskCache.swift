@@ -89,7 +89,13 @@ public class OnDiskCache<Payload: Codable>: InMemoryCache<Payload> {
         try super.clear()
         // Delete File
         let url = try cacheFileURL()
-        try FileManager.default.removeItem(at: url)
+        do {
+            try FileManager.default.removeItem(at: url)
+        } catch CocoaError.fileNoSuchFile {
+            // Do nothing
+        } catch {
+            throw error
+        }
         // delete key
         if encrypted {
             // TODO: delete key
