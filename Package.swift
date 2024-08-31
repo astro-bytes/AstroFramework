@@ -57,7 +57,7 @@ let package = Package(
         ),
         .target(
             name: "UseCaseFoundation",
-            dependencies: ["EntityFoundation"],
+            dependencies: ["EntityFoundation", "UtilityFoundation"],
             path: "UseCaseFoundation"
         ),
         .target(
