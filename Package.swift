@@ -62,6 +62,7 @@ let package = Package(
         ),
         .target(
             name: "UtilityFoundation",
+            dependencies: ["LoggerFoundation"],
             path: "UtilityFoundation"
         ),
         
