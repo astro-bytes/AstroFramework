@@ -125,7 +125,7 @@ public class OnDiskCache<Payload: Codable>: InMemoryCache<Payload> {
             } else {
                 return .success(data: payload)
             }
-        } catch let error as DecodingError {
+        } catch is DecodingError {
             // Decoding clearing the cache of corrupt data
             try? clear()
             return .uninitialized
