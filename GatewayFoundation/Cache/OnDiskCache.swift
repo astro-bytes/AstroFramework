@@ -71,17 +71,21 @@ public class OnDiskCache<Payload: Codable>: InMemoryCache<Payload> {
     
     /// Overrides the set method to encode, encrypt (if applicable), and store the cache on disk.
     public override func set(_ result: DataResult<Payload>) throws {
-        try super.set(result)
-        // encode
-        guard case .success(let payload) = result else { return }
-        let jsonData = try JSONEncoder().encode(payload)
-        // encrypt
-        if encrypted {
-            // TODO: Encrypt
+        do {
+            try super.set(result)
+            // encode
+            guard case .success(let payload) = result else { return }
+            let jsonData = try JSONEncoder().encode(payload)
+            // encrypt
+            if encrypted {
+                // TODO: Encrypt
+            }
+            // store
+            let url = try cacheFileURL()
+            try jsonData.write(to: url)
+        } catch {
+            Logger.log(.warning, error: error)
         }
-        // store
-        let url = try cacheFileURL()
-        try jsonData.write(to: url)
     }
     
     /// Overrides the clear method to delete the cache file and key (if applicable).
@@ -123,8 +127,9 @@ public class OnDiskCache<Payload: Codable>: InMemoryCache<Payload> {
             }
         } catch let error as DecodingError {
             // Decoding clearing the cache of corrupt data
-            Logger.log(.warning, error: error)
             try? clear()
+            return .uninitialized
+        } catch CocoaError.fileReadNoSuchFile {
             return .uninitialized
         } catch {
             Logger.log(.warning, error: error)
@@ -135,21 +140,25 @@ public class OnDiskCache<Payload: Codable>: InMemoryCache<Payload> {
     /// Returns the file URL related to the cache.
     /// - Returns: The file URL related to the cache.
     func cacheFileURL() throws -> URL {
-        let manager = FileManager.default
-        let cacheURL = try manager.url(
-            for: .cachesDirectory,
-            in: .userDomainMask,
-            appropriateFor: nil,
-            create: true)
-        guard let identifier = Bundle.main.bundleIdentifier else {
-            fatalError("Bundle Identifier is Essential")
+        do {
+            let manager = FileManager.default
+            let cacheURL = try manager.url(
+                for: .cachesDirectory,
+                in: .userDomainMask,
+                appropriateFor: nil,
+                create: true)
+            guard let identifier = Bundle.main.bundleIdentifier else {
+                fatalError("Bundle Identifier is Essential")
+            }
+            let bundleDirectory = cacheURL.appending(path: identifier)
+            if !bundleDirectory.isDirectory {
+                try manager.createDirectory(at: bundleDirectory, withIntermediateDirectories: true)
+            }
+            let fileURL = bundleDirectory.appending(path: filename, directoryHint: .notDirectory)
+            return fileURL
+        } catch {
+            throw error
         }
-        let bundleDirectory = cacheURL.appending(path: identifier)
-        if !bundleDirectory.isDirectory {
-            try manager.createDirectory(at: bundleDirectory, withIntermediateDirectories: true)
-        }
-        let fileURL = bundleDirectory.appending(path: filename, directoryHint: .notDirectory)
-        return fileURL
     }
 }
 

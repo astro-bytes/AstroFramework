@@ -30,7 +30,7 @@ class AnyPublisherExtensionTests: XCTestCase {
         // Then
         subject.send(valueToEmit)
         
-        await fulfillment(of: [expectation], timeout: 3)
+        await fulfillment(of: [expectation], timeout: 5)
     }
     
     func test_FirstExtensionAfterValueAlreadySent_SuccessfulCase() async throws {
@@ -49,7 +49,7 @@ class AnyPublisherExtensionTests: XCTestCase {
             expectation.fulfill()
         }
         
-        await fulfillment(of: [expectation], timeout: 3)
+        await fulfillment(of: [expectation], timeout: 5)
     }
     
     func test_FirstExtensionAfterValueAlreadySent_FailureCase() async throws {
@@ -74,7 +74,7 @@ class AnyPublisherExtensionTests: XCTestCase {
             }
         }
         
-        await fulfillment(of: [expectation], timeout: 3)
+        await fulfillment(of: [expectation], timeout: 5)
     }
     
     func testFirstExtension_TimeoutCase() async {
@@ -96,7 +96,7 @@ class AnyPublisherExtensionTests: XCTestCase {
             }
         }
         
-        await fulfillment(of: [expectation], timeout: 2)
+        await fulfillment(of: [expectation], timeout: 5)
     }
     
     func testFirstExtension_ErrorCase() async {

@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import LoggerFoundation
 
 extension URL {
     /// Checks if the URL represents a directory.
@@ -13,8 +14,10 @@ extension URL {
     public var isDirectory: Bool {
         do {
             return try resourceValues(forKeys: [.isDirectoryKey]).isDirectory == true || hasDirectoryPath
+        } catch CocoaError.fileReadNoSuchFile {
+            return false
         } catch {
-            print(String(describing: error))
+            Logger.log(.warning, error: error)
             return false
         }
     }
@@ -24,8 +27,10 @@ extension URL {
     public var isFile: Bool {
         do {
             return try resourceValues(forKeys: [.isRegularFileKey]).isRegularFile == true
+        } catch CocoaError.fileReadNoSuchFile {
+            return false
         } catch {
-            print(String(describing: error))
+            Logger.log(.warning, error: error)
             return false
         }
     }
