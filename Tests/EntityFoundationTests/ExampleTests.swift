@@ -7,4 +7,8 @@
 
 import XCTest
 
-final class ExampleTests: XCTestCase {}
+final class ExampleTests: XCTestCase {
+    func testExample() {
+        
+    }
+}

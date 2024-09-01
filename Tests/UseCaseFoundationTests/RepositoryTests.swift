@@ -30,7 +30,7 @@ class RepositoryTests: XCTestCase {
     func testGet_Uninitialized() async throws {
         // When, Then
         do {
-            var mockRepository: MockRepository<User> = MockRepository<User>(.uninitialized)
+            let mockRepository: MockRepository<User> = MockRepository<User>(.uninitialized)
             _ = try await mockRepository.get()
         } catch {
             XCTAssertEqual(error as? CoreError, .notFound)

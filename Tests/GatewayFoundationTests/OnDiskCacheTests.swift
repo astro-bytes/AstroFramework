@@ -33,16 +33,29 @@ final class OnDiskCacheTests: XCTestCase {
     }
     
     func test_SuccessfulInitNotExpired_DecodingErrorResult() throws {
-        let store = OnDiskCache<User>(name: "test", lifetime: 5)
-        try store.set(.success(data: .janeDoe))
-        
-        let secondStore = OnDiskCache<Car>(name: "test", lifetime: 5)
-        
-        XCTAssertNil(secondStore.value.error, "No error should be passed along when there is a decoding error")
-        XCTAssertNil(secondStore.value.payload, "No cache in this instance should also be passed since the cache has been corrupted")
-        let url = try store.cacheFileURL()
-        XCTAssertFalse(url.isFile, "The files should not exist")
-        XCTAssertThrowsError(try Data(contentsOf: url), "File should not contain any data")
+        do {
+            let store = OnDiskCache<User>(name: "test", lifetime: 5)
+            try store.set(.success(data: .janeDoe))
+            
+            let secondStore = OnDiskCache<Car>(name: "test", lifetime: 5)
+            
+            XCTAssertNil(secondStore.value.error, "No error should be passed along when there is a decoding error")
+            XCTAssertNil(secondStore.value.payload, "No cache in this instance should also be passed since the cache has been corrupted")
+            
+            var url: URL? = nil
+            url = try store.cacheFileURL()
+            if let url {
+                XCTAssertFalse(url.isFile, "The file should not exist")
+            }
+            
+            guard let url else { return }
+            _ = try Data(contentsOf: url)
+            XCTFail("No data should be found in the file")
+        } catch CocoaError.fileReadNoSuchFile {
+            // Pass
+        } catch {
+            XCTFail("No error should be thrown here - \(String(describing: error))")
+        }
     }
     
     func test_SuccessfulInitExpired_LoadingResult() async throws {

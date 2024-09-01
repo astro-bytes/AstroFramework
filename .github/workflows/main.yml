@@ -6,7 +6,7 @@ on:
 
 jobs:
   build:
-    name: ${{ matrix.module }} Module Build & Tests
+    name: ${{ matrix.module }} Module Build
     strategy:
       fail-fast: false
       matrix:
@@ -17,5 +17,12 @@ jobs:
         uses: actions/checkout@v4
       - name: Build
         run: swift build --target ${{ matrix.module }}
+
+  test:
+    name: Unit Tests
+    runs-on: [self-hosted]
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
       - name: Test
-        run: swift test --test-product ${{ matrix.module }}
+        run: swift test

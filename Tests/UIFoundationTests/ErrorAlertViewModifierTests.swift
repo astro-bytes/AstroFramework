@@ -7,4 +7,6 @@
 
 import XCTest
 
-final class ErrorAlertViewModifierTests: XCTestCase {}
+final class ErrorAlertViewModifierTests: XCTestCase {
+    func testExample() {}
+}
