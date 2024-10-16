@@ -70,50 +70,20 @@ public class Logger {
     /// - Parameters:
     ///   - level: the status or importance of the log
     ///   - msg: the content of the log or information to be passed
+    ///   - error: the error
+    ///   - data: additional data to pass along
     ///   - domain: the specific context from where the log came from, defaults to `Core`
     public static func log(_ level: Logger.Level,
-                           msg message: String,
+                           msg message: String = "",
+                           error: Error? = nil,
+                           data: [String: String]? = nil,
                            domain: String = "Core",
                            date: Date = .now,
                            file: String = #file,
                            line: Int = #line,
                            method: String = #function) {
-        logBase(level, msg: message, domain: domain, date: date,
-                file: file, line: line, method: method)
-    }
-    
-    /// Base internal logging
-    /// - Parameters:
-    ///   - level: the status or importance of the log
-    ///   - error: an error whose description is used to add value to the message
-    ///   - domain: the specific context from where the log came from, defaults to `Core`
-    public static func log(_ level: Logger.Level,
-                           error: Error,
-                           domain: String = "Core",
-                           date: Date = .now,
-                           file: String = #file,
-                           line: Int = #line,
-                           method: String = #function) {
-        logBase(level, msg: String(describing: error), domain: domain, date: date,
-                file: file, line: line, method: method)
-    }
-    
-    /// Base internal logging
-    /// - Parameters:
-    ///   - level: the status or importance of the log
-    ///   - msg: the content of the log or information to be passed
-    ///   - error: an error whose description is used to add value to the message
-    ///   - domain: the specific context from where the log came from, defaults to `Core`
-    public static func log(_ level: Logger.Level,
-                           msg message: String,
-                           error: Error,
-                           domain: String = "Core",
-                           date: Date = .now,
-                           file: String = #file,
-                           line: Int = #line,
-                           method: String = #function) {
-        logBase(level, msg: "\(message) - \(String(describing: error))", domain: domain, date: date,
-                file: file, line: line, method: method)
+        logBase(level, msg: message, error: error, data: data, domain: domain,
+                date: date, file: file, line: line, method: method)
     }
     
     /// Base internal logging
@@ -127,6 +97,8 @@ public class Logger {
     ///   - method: the method where the log was called from
     static func logBase(_ level: Logger.Level,
                         msg message: String,
+                        error: Error?,
+                        data: [String: String]?,
                         domain: String,
                         date: Date,
                         file: String,
@@ -135,7 +107,7 @@ public class Logger {
         // TODO: Decide is it better to use a loop like so on a background thread or better to use a publisher?
         Task.detached(priority: .background) {
             for interceptor in shared.interceptors {
-                interceptor.intercept(level: level, message: message, domain: domain,
+                interceptor.intercept(level: level, message: message, error: error, data: data, domain: domain,
                                       date: date, file: file, line: line, method: method)
             }
         }
