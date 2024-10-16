@@ -40,6 +40,8 @@ final class LoggerTests: XCTestCase {
     func testCreatingLogCallsIntercepts() {
         let mock = MockInterceptor()
         let level = Logger.Level.info
+        let error = NSError(domain: "example", code: 1)
+        let data = ["example": "data"]
         let domain = "The Domain"
         let date = Date.now
         let msg = "Test"
@@ -54,6 +56,8 @@ final class LoggerTests: XCTestCase {
             if isCalled {
                 XCTAssertEqual(mock.level, level)
                 XCTAssertEqual(mock.message, msg)
+                XCTAssertEqual(mock.error! as NSError, error)
+                XCTAssertEqual(mock.data, data)
                 XCTAssertEqual(mock.domain, domain)
                 XCTAssertEqual(mock.date, date)
                 XCTAssertEqual(mock.file, file)
@@ -63,7 +67,7 @@ final class LoggerTests: XCTestCase {
             }
         }.store(in: &cancelBucket)
         
-        Logger.logBase(level, msg: msg, domain: domain, date: date, file: file, line: line, method: method)
+        Logger.logBase(level, msg: msg, error: error, data: data, domain: domain, date: date, file: file, line: line, method: method)
         wait(for: [methodCallExpectation], timeout: 1)
         
         XCTAssertTrue(mock.interceptIsCalled)
