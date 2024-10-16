@@ -74,7 +74,7 @@ public class Logger {
     ///   - data: additional data to pass along
     ///   - domain: the specific context from where the log came from, defaults to `Core`
     public static func log(_ level: Logger.Level,
-                           msg message: String,
+                           msg message: String = "",
                            error: Error? = nil,
                            data: [String: String]? = nil,
                            domain: String = "Core",
