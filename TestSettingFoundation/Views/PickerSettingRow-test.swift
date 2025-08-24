@@ -14,6 +14,7 @@ public struct PickerSettingRow: View {
     
     public init(_ setting: any PickerTestSetting) {
         self.setting = setting
+        self._selection = .init(initialValue: setting.initialSelection)
     }
     
     public var body: some View {
@@ -22,17 +23,16 @@ public struct PickerSettingRow: View {
                 .tag(String?(nil))
             
             ForEach(setting.options, id: \.name) { option in
-                Text(option.name)
-                    .tag(option.name as String?)
+                if let name = option.name {
+                    Text(name)
+                        .tag(name)
+                }
             }
         } label: {
             TestSettingRow(setting)
         }
         .onChange(of: selection) { _, newValue in
             setting.onUpdate(newValue)
-        }
-        .task {
-            selection = await setting.initialSelection
         }
     }
 }

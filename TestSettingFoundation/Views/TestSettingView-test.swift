@@ -20,6 +20,10 @@ public struct TestSettingsView: View {
         self.sections = sections
     }
     
+    public init(builder: () -> TestSettingSections) {
+        self.init(builder())
+    }
+    
     public var body: some View {
         Group {
             if sections.isEmpty {
