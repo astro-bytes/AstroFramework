@@ -25,6 +25,10 @@ let package = Package(
             name: "LoggerFoundation",
             targets: ["LoggerFoundation"]),
         .library(
+            name: "TestSettingFoundation",
+            targets: ["TestSettingFoundation"]
+        ),
+        .library(
             name: "UIFoundation",
             targets: ["UIFoundation"]),
         .library(
@@ -49,6 +53,10 @@ let package = Package(
         .target(
             name: "LoggerFoundation",
             path: "LoggerFoundation"
+        ),
+        .target(
+            name: "TestSettingFoundation",
+            path: "TestSettingFoundation"
         ),
         .target(
             name: "UIFoundation",
