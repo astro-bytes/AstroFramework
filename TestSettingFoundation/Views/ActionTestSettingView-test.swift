@@ -10,9 +10,9 @@ import SwiftUI
 public struct ActionTestSettingView: View {
     @State private var presentConfirmation = false
     
-    let setting: ActionTestSetting
+    let setting: any ActionTestSetting
     
-    public init(_ setting: ActionTestSetting) {
+    public init(_ setting: any ActionTestSetting) {
         self.setting = setting
     }
     

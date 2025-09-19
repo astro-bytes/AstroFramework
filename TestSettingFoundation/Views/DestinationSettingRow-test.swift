@@ -8,9 +8,9 @@
 import SwiftUI
 
 public struct DestinationSettingRow: View {
-    let setting: DestinationTestSetting
+    let setting: any DestinationTestSetting
     
-    public init(_ setting: DestinationTestSetting) {
+    public init(_ setting: any DestinationTestSetting) {
         self.setting = setting
     }
     

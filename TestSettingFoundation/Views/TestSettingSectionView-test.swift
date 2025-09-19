@@ -23,15 +23,15 @@ public struct TestSettingSectionView: View {
             Section(section.label, isExpanded: $isExpanded) {
                 ForEach(settings.sorted(), id: \.id) { setting in
                     if !setting.hidden {
-                        if let setting = setting as? DestinationTestSetting {
+                        if let setting = setting as? (any DestinationTestSetting) {
                             DestinationSettingRow(setting)
-                        } else if let setting = setting as? PickerTestSetting {
+                        } else if let setting = setting as? (any PickerTestSetting) {
                             PickerSettingRow(setting)
-                        } else if let setting = setting as? ToggleTestSetting {
+                        } else if let setting = setting as? (any ToggleTestSetting) {
                             ToggleSettingRow(setting)
-                        } else if let setting = setting as? ActionTestSetting {
+                        } else if let setting = setting as? (any ActionTestSetting) {
                             ActionTestSettingView(setting)
-                        } else if let setting = setting as? InputTestSetting {
+                        } else if let setting = setting as? (any InputTestSetting) {
                             InputTestSettingRow(setting)
                         } else {
                             TestSettingRow(setting)

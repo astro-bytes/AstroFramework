@@ -11,9 +11,9 @@ public struct InputTestSettingRow: View {
     @State private var isAlertPresented = false
     @State private var input = ""
     
-    let setting: InputTestSetting
+    let setting: any InputTestSetting
     
-    public init(_ setting: InputTestSetting) {
+    public init(_ setting: any InputTestSetting) {
         self.setting = setting
     }
     

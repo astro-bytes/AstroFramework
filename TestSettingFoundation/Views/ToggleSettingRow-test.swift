@@ -10,9 +10,9 @@ import SwiftUI
 public struct ToggleSettingRow: View {
     @State private var isOn: Bool
     
-    let setting: ToggleTestSetting
+    let setting: any ToggleTestSetting
     
-    public init(_ setting: ToggleTestSetting) {
+    public init(_ setting: any ToggleTestSetting) {
         self.setting = setting
         self._isOn = State(initialValue: setting.initialValue)
     }

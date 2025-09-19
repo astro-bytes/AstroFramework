@@ -22,7 +22,7 @@ public extension TestSetting {
     var priority: UInt { 0 }
     var section: TestSettingSection { .general }
     
-    public func hash(into hasher: inout Hasher) {
+    func hash(into hasher: inout Hasher) {
         hasher.combine(id)
         hasher.combine(title)
         hasher.combine(detail)
