@@ -11,7 +11,7 @@ jobs:
       fail-fast: false
       matrix:
         module: [EntityFoundation, UseCaseFoundation, GatewayFoundation, LoggerFoundation, UIFoundation, UtilityFoundation]
-    runs-on: [self-hosted]
+    runs-on: macos-latest
     steps:
       - name: "Checkout Repo"
         uses: actions/checkout@v4
@@ -20,7 +20,7 @@ jobs:
 
   test:
     name: Unit Tests
-    runs-on: [self-hosted]
+    runs-on: macos-latest
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v4
