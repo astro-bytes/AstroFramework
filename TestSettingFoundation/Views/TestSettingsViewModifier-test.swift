@@ -33,10 +33,8 @@ public struct TestSettingsViewModifier: ViewModifier {
         }
         .toolbar {
             ToolbarItem(placement: .secondaryAction) {
-                Button {
+                Button("Test Settings", systemImage: "testtube.2") {
                     isTestSettingsPresented = true
-                } label: {
-                    Image(systemName: "testtube.2")
                 }
                 .foregroundStyle(buttonStyle)
             }
