@@ -23,7 +23,7 @@ public struct TestSettingsViewModifier: ViewModifier {
         content.fullScreenCover(isPresented: $isTestSettingsPresented) {
             NavigationStack {
                 TestSettingsView(sections).toolbar {
-                    ToolbarItem(placement: .topBarTrailing) {
+                    ToolbarItem(placement: .cancellationAction) {
                         Button { isTestSettingsPresented = false } label: {
                             Image(systemName: "xmark")
                         }
@@ -32,11 +32,9 @@ public struct TestSettingsViewModifier: ViewModifier {
             }
         }
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button {
+            ToolbarItem(placement: .secondaryAction) {
+                Button("Test Settings", systemImage: "testtube.2") {
                     isTestSettingsPresented = true
-                } label: {
-                    Image(systemName: "testtube.2")
                 }
                 .foregroundStyle(buttonStyle)
             }
