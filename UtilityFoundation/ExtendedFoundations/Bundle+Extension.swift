@@ -7,13 +7,16 @@
 
 import Foundation
 
-import Foundation
-
 public extension Bundle {
+    var fullAppVersion: String {
+        return "\(appVersion) (\(buildVersion))"
+    }
+    
     var appVersion: String {
-        let version = object(forInfoDictionaryKey: "CFBundleShortVersionString") as! String
-        let build = object(forInfoDictionaryKey: "CFBundleVersion") as! String
-        return "\(version) (\(build))"
+        object(forInfoDictionaryKey: "CFBundleShortVersionString") as! String
+    }
+    
+    var buildVersion: String {
+        object(forInfoDictionaryKey: "CFBundleVersion") as! String
     }
 }
-
