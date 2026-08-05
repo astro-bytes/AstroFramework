@@ -12,7 +12,7 @@ class MockInterceptor: Interceptor {
     
     @Published var interceptIsCalled = false
     
-    var level: Logger.Level?
+    var level: LogLevel?
     var message: String?
     var data: [String: String]?
     var error: Error?
@@ -22,7 +22,7 @@ class MockInterceptor: Interceptor {
     var line: Int?
     var method: String?
     
-    func intercept(level: LoggerFoundation.Logger.Level, message: String, error: (any Error)?, data: [String : String]?, domain: String, date: Date, file: String, line: Int, method: String) {
+    func intercept(level: LoggerFoundation.LogLevel, message: String, error: (any Error)?, data: [String : String]?, domain: String, date: Date, file: String, line: Int, method: String) {
         self.level = level
         self.message = message
         self.error = error

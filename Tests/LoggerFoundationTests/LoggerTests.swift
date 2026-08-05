@@ -54,7 +54,7 @@ final class LoggerTests: XCTestCase {
         let methodCallExpectation = XCTestExpectation()
         mock.$interceptIsCalled.sink { isCalled in
             if isCalled {
-                XCTAssertEqual(mock.level, level)
+                XCTAssertEqual(mock.level as! Logger.Level, level)
                 XCTAssertEqual(mock.message, msg)
                 XCTAssertEqual(mock.error! as NSError, error)
                 XCTAssertEqual(mock.data, data)
@@ -71,5 +71,14 @@ final class LoggerTests: XCTestCase {
         wait(for: [methodCallExpectation], timeout: 1)
         
         XCTAssertTrue(mock.interceptIsCalled)
+    }
+    
+    func testLogs() {
+        Logger.log(.debug, msg: "debug")
+        Logger.log(.info, msg: "info")
+        Logger.log(.warning, msg: "warning")
+        Logger.log(.critical, msg: "critical")
+        
+        XCTAssertTrue(true)
     }
 }
