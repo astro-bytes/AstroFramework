@@ -73,8 +73,8 @@ public class Logger {
     ///   - error: the error
     ///   - data: additional data to pass along
     ///   - domain: the specific context from where the log came from, defaults to `Core`
-    public static func log<Level: LogLevel>(
-        _ level: Level,
+    public static func log(
+        _ level: Logger.Level,
         msg message: String = "",
         error: Error? = nil,
         data: [String: String]? = nil,
@@ -98,7 +98,7 @@ public class Logger {
     ///   - line: the line from where the log was called from
     ///   - method: the method where the log was called from
     static func logBase(
-        _ level: LogLevel,
+        _ level: Logger.Level,
         msg message: String,
         error: Error?,
         data: [String: String]?,
@@ -131,29 +131,5 @@ public class Logger {
         #else
         self.interceptors = []
         #endif
-    }
-}
-
-public extension Logger {
-    /// Base internal logging
-    /// - Parameters:
-    ///   - level: the status or importance of the log
-    ///   - msg: the content of the log or information to be passed
-    ///   - error: the error
-    ///   - data: additional data to pass along
-    ///   - domain: the specific context from where the log came from, defaults to `Core`
-    static func log(
-        _ level: Logger.Level,
-        msg message: String = "",
-        error: Error? = nil,
-        data: [String: String]? = nil,
-        domain: String = "Core",
-        date: Date = .now,
-        file: String = #file,
-        line: Int = #line,
-        method: String = #function
-    ) {
-        logBase(level, msg: message, error: error, data: data, domain: domain,
-                date: date, file: file, line: line, method: method)
     }
 }

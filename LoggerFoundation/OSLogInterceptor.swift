@@ -11,7 +11,7 @@ import os
 /// Logs to the Console in a very OS friendly way
 struct OSLogInterceptor: Interceptor {
     func intercept(
-        level: LogLevel,
+        level: Logger.Level,
         message: String,
         error: Error?,
         data: [String: String]?,

@@ -44,7 +44,7 @@ public protocol Interceptor {
     ///   - line: the line from where the log was called from
     ///   - method: the method where the log was called from
     func intercept(
-        level: LogLevel,
+        level: Logger.Level,
         message: String,
         error: Error?,
         data: [String: String]?,

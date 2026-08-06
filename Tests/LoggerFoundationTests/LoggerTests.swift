@@ -54,7 +54,7 @@ final class LoggerTests: XCTestCase {
         let methodCallExpectation = XCTestExpectation()
         mock.$interceptIsCalled.sink { isCalled in
             if isCalled {
-                XCTAssertEqual(mock.level as! Logger.Level, level)
+                XCTAssertEqual(mock.level, level)
                 XCTAssertEqual(mock.message, msg)
                 XCTAssertEqual(mock.error! as NSError, error)
                 XCTAssertEqual(mock.data, data)
