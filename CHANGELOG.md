@@ -37,6 +37,9 @@ to be honest about what they do.
 
 - `Logger.minimumLevel` filters by severity before delivery. `Level` is `Comparable`.
 - `Logger.apply` returns a token; `Logger.remove(_:)`, `removeAllInterceptors()` and `reset()`.
+- `CacheCipher` — `OnDiskCache` takes an injected cipher, so an app encrypts its cached payloads
+  however it wants. `AESGCMCipher` ships for the common case, taking a `SymmetricKey` the app
+  supplies and manages.
 - `CustomTestSetting` lets an app draw its own Test Settings row.
 - `Mocks` is a product, so apps can build against the same fakes the package tests with. Its spy
   flags are publicly readable.
@@ -62,7 +65,8 @@ to be honest about what they do.
 ### Removed
 
 - **`OnDiskCache`'s `encrypted` parameter**, which defaulted to `true` and encrypted nothing. Every
-  path it guarded was a `// TODO`. Payloads were, and still are, plaintext JSON.
+  path it guarded was a `// TODO`. Replaced by the injected `CacheCipher` above; a payload is
+  plaintext only when no cipher is passed.
 - `errorAlert(error:retry:)` and `errorAlert(error:asyncRetry:)`, which took a closure and
   forwarded it nowhere.
 - `CollectionDataStore`, which restated `KeyedDataStore` and had no conformers.
