@@ -39,7 +39,7 @@ Then take only the products a target needs:
 | [`UtilityFoundation`](#utilityfoundation) | Errors, and extensions to the standard library | `LoggerFoundation` |
 | [`LoggerFoundation`](#loggerfoundation) | Logging with pluggable interceptors | — |
 | [`UseCaseFoundation`](#usecasefoundation) | `DataResult`, the repository ports, use-case protocols | `EntityFoundation`, `UtilityFoundation` |
-| [`GatewayFoundation`](#gatewayfoundation) | Caches, data sources, data stores | `LoggerFoundation`, `UtilityFoundation`, `UseCaseFoundation` |
+| [`GatewayFoundation`](#gatewayfoundation) | Caches and data sources | `LoggerFoundation`, `UtilityFoundation`, `UseCaseFoundation` |
 | [`UIFoundation`](#uifoundation) | SwiftUI helpers and error presentation | `LoggerFoundation`, `UtilityFoundation` |
 | [`TestSettingFoundation`](TestSettingFoundation/README.md) | A debug settings screen | — |
 | `Mocks` | Fakes for the protocols above, for your tests | `GatewayFoundation`, `UseCaseFoundation` |
@@ -97,12 +97,16 @@ a refresh is in flight or after one fails.
 `Repository` is the port a use case reads through, and `KeyedRepository` its by-identifier
 counterpart. `get(within:)` awaits the first non-loading result and unwraps it.
 
+A repository that already holds its value — one backed by a cache in memory — also conforms to
+`SynchronousRepository`, which adds a `get()` that answers without awaiting. That is a capability
+rather than a layer, which is why it sits here beside `Repository` rather than in the gateway
+module.
+
 `UseCase` and `AsyncUseCase` are one-method protocols for a unit of application logic.
 
 ### GatewayFoundation
 
-The implementation side. `DataStore` refines `Repository`, adding a synchronous accessor for a
-store that already holds its value; `KeyedDataStore` does the same for `KeyedRepository`.
+Where data comes from, and how it is kept.
 
 `InMemoryCache` and `OnDiskCache` are expirable caches. The on-disk one keeps the payload and the
 date it was written together in one file under the caches directory.
