@@ -10,9 +10,13 @@ import Combine
 import EntityFoundation
 import UtilityFoundation
 
-/// Interface that follows the Repository Pattern.
+/// A source of one value that can be observed, refreshed, replaced and cleared.
 ///
-/// This structurally provides a way to access data from an underlying `DataStore` in a uniform way.
+/// The Repository Pattern as a port: the use-case layer declares this, and the gateway layer
+/// implements it — see ``GatewayFoundation/DataStore`` for the implementation side, which adds a
+/// synchronous accessor.
+///
+/// Conform to this when a use case needs a value and should not know where it comes from.
 public protocol Repository<Payload> {
     /// The data with the ability to subscribe to and observe the data's current state.
     ///

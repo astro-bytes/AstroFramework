@@ -10,28 +10,16 @@ import Foundation
 import UseCaseFoundation
 import UtilityFoundation
 
-/// Interface that follows the Repository Pattern.
-/// This structurally provides a way to access data from an underlying ``DataStore`` in a uniform way.
-public protocol DataStore<Payload> {
-    /// Generic defining the data type used by the repository
-    associatedtype Payload: Sendable
-    
-    /// The data with the ability to subscribe to and observe the data's current state
-    var data: AnyPublisher<DataResult<Payload>, Never> { get }
-    
-    /// Forces the data to be pulled and updated from the source instead of from the cache
-    func refresh()
-    
-    /// Forces the data to be pulled and updated from the source instead of from the cache
-    /// - Returns: The current value of the data after a refresh
-    func refresh() async -> DataResult<Payload>
-    
+/// A ``UseCaseFoundation/Repository`` whose current value can also be read synchronously.
+///
+/// The gateway layer implements the port the use-case layer declares, which is why this refines
+/// `Repository` rather than restating it. It previously declared `data`, `refresh()`,
+/// `refresh() async`, `set(_:)` and `clear()` for itself — the same five, with the same doc
+/// comment, in two modules — leaving nothing to say which one a type ought to conform to.
+///
+/// What it adds is the synchronous accessor. A store holds its value, so it can hand it over
+/// without awaiting; a repository in general may have to go and fetch it.
+public protocol DataStore<Payload>: Repository {
     /// - Returns: the current state value of the data.
     func get() -> DataResult<Payload>
-    
-    /// - Parameter payload: the new value that is being updated
-    func set(_ payload: Payload)
-    
-    /// Clears any cached data locally. A refresh should be called again to repopulate the ``data``.
-    func clear()
 }
