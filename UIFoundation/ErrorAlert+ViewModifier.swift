@@ -66,55 +66,68 @@ struct ErrorAlertViewModifier: ViewModifier {
     }
     
     func body(content: Content) -> some View {
+        // The alert goes on unconditionally. Branching the body on `if let error` gave the two
+        // states structurally different views, so presenting and dismissing changed the view's
+        // identity underneath SwiftUI — which is what makes alerts drop, double-fire, or skip
+        // their transition. `isPresented` is false while the error is nil, which is all the
+        // condition this ever needed.
+        content.alert(title, isPresented: isPresented) {
+            actions
+        } message: {
+            if let body {
+                Text(body)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var actions: some View {
         if let error {
-            content.alert(title, isPresented: isPresented) {
-                if let actionError = error as? ActionableError {
-                    let role: ButtonRole? = reportable && !dismissible ? .cancel : nil
-                    Button(actionError.label, role: role) {
-                        do {
-                            try actionError.perform()
-                        } catch {
-                            self.error = error
-                        }
-                    }
-                }
-                
-                if let actionError = error as? AsyncActionableError {
-                    let role: ButtonRole? = reportable && !dismissible ? .cancel : nil
-                    Button(actionError.label, role: role) {
-                        Task { @MainActor in
-                            do {
-                                try await actionError.perform()
-                            } catch {
-                                self.error = error
-                            }
-                        }
-                    }
-                }
-                
-                if reportable, let report {
-                    Button("Report", role: .destructive, action: {
-                        report(error)
-                        if let actionError = error as? ActionableError {
-                            do {
-                                try actionError.perform()
-                            } catch {
-                                self.error = error
-                            }
-                        }
-                    })
-                }
-                
-                if dismissible {
-                    Button("OK", role: .cancel, action: {})
-                }
-            } message: {
-                if let body {
-                    Text(body)
+            // Without a dismiss button of its own, the alert needs the action button to carry the
+            // cancel role so there is still an obvious way out.
+            let actionRole: ButtonRole? = reportable && !dismissible ? .cancel : nil
+
+            if let actionError = error as? ActionableError {
+                Button(actionError.label, role: actionRole) {
+                    perform(actionError)
                 }
             }
-        } else {
-            content
+
+            if let actionError = error as? AsyncActionableError {
+                Button(actionError.label, role: actionRole) {
+                    Task { await perform(actionError) }
+                }
+            }
+
+            if reportable, let report {
+                Button("Report") {
+                    report(error)
+                    if let actionError = error as? ActionableError {
+                        perform(actionError)
+                    }
+                }
+            }
+
+            if dismissible {
+                Button("OK", role: .cancel, action: {})
+            }
+        }
+    }
+
+    /// Runs the error's own recovery action, replacing the presented error if it fails.
+    private func perform(_ actionError: any ActionableError) {
+        do {
+            try actionError.perform()
+        } catch {
+            self.error = error
+        }
+    }
+
+    private func perform(_ actionError: any AsyncActionableError) async {
+        do {
+            try await actionError.perform()
+        } catch {
+            self.error = error
         }
     }
 }
@@ -129,34 +142,48 @@ public extension EnvironmentValues {
 }
 
 public extension View {
-    /// Presents an alert dialog when an error occurs.
-    /// - Parameters:
-    ///   - error: Binded value when not nil presents the error and provides the error itself and is return to nil on dismiss
+    /// Presents an alert when `error` becomes non-`nil`, clearing it again on dismissal.
     ///
-    ///  ## Report button
-    /// Additionally use the `.reportError(_:)` function to perform an action when the user presses the report button on the dialog.
-    /// If this environment value is not provided no reporting is done ad no report button is shown
-    // TODO: Add Example
+    /// The alert titles and describes itself from the error. Conform it to ``DisplayableError`` to
+    /// choose the wording, ``ActionableError`` to offer a recovery button, and
+    /// ``AsyncActionableError`` when that recovery is asynchronous. Anything else gets a generic
+    /// title and message.
+    ///
+    /// ```swift
+    /// struct ProfileView: View {
+    ///     @State private var error: (any Error)?
+    ///
+    ///     var body: some View {
+    ///         List { /* ... */ }
+    ///             .errorAlert(error: $error)
+    ///             .task {
+    ///                 do { try await load() } catch { self.error = error }
+    ///             }
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ## Report button
+    ///
+    /// Supply a handler with ``reportError(_:)`` and errors marked reportable gain a Report
+    /// button. Without a handler no button is shown, whatever the error asks for.
+    ///
+    /// - Parameter error: The error to present. Set back to `nil` when the alert is dismissed.
     func errorAlert(error: Binding<(any Error)?>) -> some View {
         modifier(ErrorAlertViewModifier(error: error))
     }
-    
-    @available(*, deprecated)
-    func errorAlert(error: Binding<(any Error)?>, retry: (() -> Void)? = nil) -> some View {
-        modifier(ErrorAlertViewModifier(error: error))
-    }
-    
-    // TODO: Add Example
-    @available(*, deprecated)
-    func errorAlert(error: Binding<(any Error)?>, asyncRetry: @escaping () async -> Void) -> some View {
-        modifier(ErrorAlertViewModifier(error: error))
-    }
-    
-    /// Adds an environment variable that is called when needing to report an error
-    /// - Parameter action: the functionality provided when reporting an error
-    // TODO: Add Example
+
+    /// Supplies the action taken when the user presses Report on an error alert.
+    ///
+    /// Read from the environment, so one call near the root covers every alert beneath it.
+    ///
+    /// ```swift
+    /// ContentView()
+    ///     .reportError { crashReporter.record($0) }
+    /// ```
+    ///
+    /// - Parameter action: What to do with a reported error.
     func reportError(_ action: @escaping @Sendable (any Error) -> Void) -> some View {
         environment(\.reportError, action)
     }
 }
-
