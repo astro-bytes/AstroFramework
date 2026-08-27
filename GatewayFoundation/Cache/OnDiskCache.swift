@@ -1,6 +1,6 @@
 //
 //  OnDiskCache.swift
-//  GatewayBasics
+//  GatewayFoundation
 //
 //  Created by Porter McGary on 1/17/24.
 //
@@ -10,162 +10,121 @@ import LoggerFoundation
 import UseCaseFoundation
 import UtilityFoundation
 
-/// A class representing an on-disk cache with expirable data, inheriting from `InMemoryCache`.
-/// This cache persists data on disk, allowing for retrieval even after the application restarts.
-/// It supports optional encryption for added security.
+/// An expirable cache that persists its payload to disk, so a value survives relaunches.
+///
+/// The payload and the date it was written travel together in one file. Keeping the date beside
+/// the value rather than in `UserDefaults` means clearing the cache is a single delete that cannot
+/// half-succeed, and there is no separately-keyed date to fall out of step with the file.
 public class OnDiskCache<Payload: Codable>: InMemoryCache<Payload> {
+    /// What actually goes in the file: the payload, plus when it was written.
+    private struct Envelope: Codable {
+        let cachedDate: Date
+        let payload: Payload
+    }
+
     /// The name of the cache file.
     let filename: String
-    
-    /// Flag indicating whether the cache is encrypted or not.
-    let encrypted: Bool
-    
-    /// Container with access to cached values.
-    let defaults: UserDefaults
-    
-    /// The unique name used as a key for UserDefaults.
+
+    /// The unique name identifying this cache.
     let name: String
-    
-    /// Overrides the cachedDate property to persist the value in UserDefaults.
-    public override var cachedDate: Date? {
-        /// sets the cached date value to user defaults for safe keeping
-        set { defaults.set(newValue, forKey: name) }
-        /// retrieves the cached date value from user defaults
-        get { defaults.object(forKey: name) as? Date }
-    }
-    
+
     /// Creates a datastore with an on-disk expirable cache.
     /// - Parameters:
-    ///   - name: The key name used to store the cached date and cache file, defaults to Payload.type.
+    ///   - name: The name used for the cache file, defaults to the payload's type name.
     ///   - lifetime: The time that the cache has to live before becoming expired.
-    ///   - encrypted: Flag indicating if the data is stored as encrypted objects.
     ///   - invalidateImmediately: Flag indicating if the cache should be immediately invalidated and removed from disk when initialized.
     public init(name: String = "\(Payload.self)",
-                lifetime: TimeInterval, encrypted: Bool = true,
+                lifetime: TimeInterval,
                 invalidateImmediately: Bool = false) {
-        guard let defaults = UserDefaults.init(suiteName: "caches") else {
-            // WTF UserDefaults
-            fatalError("UserDefaults suite 'caches' failed")
-        }
-        
         self.filename = "\(name).json"
-        self.encrypted = encrypted
-        self.defaults = defaults
         self.name = name
         super.init(lifetime: lifetime)
-        
-        if !invalidateImmediately {
-            let result = get()
-            switch result {
-            case .success:
-                try? super.set(result)
-            default:
-                self.value = result
-            }
-        } else {
-            // clear the cache if it is to be immediately invalidated.
-            // no need to keep it around
-            try? self.clear()
+
+        guard !invalidateImmediately else {
+            // Clear the cache if it is to be immediately invalidated. No need to keep it around.
+            try? clear()
+            return
         }
+
+        let (result, writtenAt) = read()
+        restore(result, cachedAt: writtenAt)
     }
-    
-    /// Overrides the set method to encode, encrypt (if applicable), and store the cache on disk.
+
+    /// Writes the result to disk, restarting the expiry clock.
+    ///
+    /// Only a success is worth persisting; anything else removes the file, so what is on disk and
+    /// what is in memory never disagree.
+    /// - Throws: If the payload cannot be encoded, or the file cannot be written or removed.
     public override func set(_ result: DataResult<Payload>) throws {
-        do {
-            try super.set(result)
-            // encode
-            guard case .success(let payload) = result else { return }
-            let jsonData = try JSONEncoder().encode(payload)
-            // encrypt
-            if encrypted {
-                // TODO: Encrypt
-            }
-            // store
-            let url = try cacheFileURL()
-            try jsonData.write(to: url)
-        } catch {
-            Logger.log(.warning, error: error)
+        try super.set(result)
+
+        guard case .success(let payload) = result, let cachedDate else {
+            try removeFile()
+            return
         }
+
+        let data = try JSONEncoder().encode(Envelope(cachedDate: cachedDate, payload: payload))
+        let url = try cacheFileURL()
+        try data.write(to: url)
     }
-    
-    /// Overrides the clear method to delete the cache file and key (if applicable).
+
+    /// Clears the in-memory value and deletes the backing file.
+    /// - Throws: If the file exists but cannot be removed.
     public override func clear() throws {
         try super.clear()
-        // Delete File
-        let url = try cacheFileURL()
-        do {
-            try FileManager.default.removeItem(at: url)
-        } catch CocoaError.fileNoSuchFile {
-            // Do nothing
-        } catch {
-            throw error
-        }
-        // delete key
-        if encrypted {
-            // TODO: delete key
-        }
+        try removeFile()
     }
-    
-    /// Retrieves the cache value from the disk.
-    /// - Returns: A data result of the cache value.
-    func get() -> DataResult<Payload> {
+
+    /// Reads the cache back from disk.
+    /// - Returns: The result to adopt, and the date the value was originally written.
+    func read() -> (DataResult<Payload>, Date?) {
         do {
-            // read file
             let url = try cacheFileURL()
-            let cachedData = try Data(contentsOf: url)
-            // decrypt
-            if encrypted {
-                // TODO: Decrypt
-            }
-            // decode
-            let payload = try JSONDecoder().decode(Payload.self, from: cachedData)
-            
-            if isExpired {
-                return .loading(cachedData: payload)
-            } else {
-                return .success(data: payload)
-            }
+            let data = try Data(contentsOf: url)
+            let envelope = try JSONDecoder().decode(Envelope.self, from: data)
+
+            // `isExpired` reads `cachedDate`, which is not set yet — so ask the date directly.
+            let hasExpired = Date.now > envelope.cachedDate.addingTimeInterval(lifetime)
+            let result: DataResult<Payload> = hasExpired
+                ? .loading(cachedData: envelope.payload)
+                : .success(data: envelope.payload)
+
+            return (result, envelope.cachedDate)
         } catch is DecodingError {
-            // Decoding clearing the cache of corrupt data
+            // The file is corrupt, or was written by an older format. Either way it is unusable,
+            // so drop it and start over rather than reporting an error the caller cannot act on.
             try? clear()
-            return .uninitialized
+            return (.uninitialized, nil)
         } catch CocoaError.fileReadNoSuchFile {
-            return .uninitialized
+            return (.uninitialized, nil)
         } catch {
             Logger.log(.warning, error: error)
-            return .failure(cachedData: nil, error: error)
+            return (.failure(cachedData: nil, error: error), nil)
         }
     }
-    
-    /// Returns the file URL related to the cache.
-    /// - Returns: The file URL related to the cache.
-    func cacheFileURL() throws -> URL {
-        do {
-            let manager = FileManager.default
-            let cacheURL = try manager.url(
-                for: .cachesDirectory,
-                in: .userDomainMask,
-                appropriateFor: nil,
-                create: true)
-            guard let identifier = Bundle.main.bundleIdentifier else {
-                fatalError("Bundle Identifier is Essential")
-            }
-            let bundleDirectory = cacheURL.appending(path: identifier)
-            if !bundleDirectory.isDirectory {
-                try manager.createDirectory(at: bundleDirectory, withIntermediateDirectories: true)
-            }
-            let fileURL = bundleDirectory.appending(path: filename, directoryHint: .notDirectory)
-            return fileURL
-        } catch {
-            throw error
-        }
-    }
-}
 
-enum EncryptionManager {
-    //TODO: encrypt
-    
-    //TODO: Decrypt
-    
-    //TODO: get key
+    /// Deletes the backing file, treating "it was not there" as success.
+    private func removeFile() throws {
+        do {
+            try FileManager.default.removeItem(at: cacheFileURL())
+        } catch CocoaError.fileNoSuchFile {
+            // Already gone, which is what was wanted.
+        }
+    }
+
+    /// Returns the file URL related to the cache, creating the containing directory if needed.
+    func cacheFileURL() throws -> URL {
+        let manager = FileManager.default
+        let cacheURL = try manager.url(for: .cachesDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
+
+        // `bundleIdentifier` is nil in plenty of legitimate hosts — a plain XCTest runner among
+        // them — so fall back rather than trapping. The name only has to keep this package's
+        // caches out of everyone else's.
+        let container = Bundle.main.bundleIdentifier ?? "AstroFramework"
+
+        let directory = cacheURL.appending(path: container, directoryHint: .isDirectory)
+        try manager.createDirectory(at: directory, withIntermediateDirectories: true)
+
+        return directory.appending(path: filename, directoryHint: .notDirectory)
+    }
 }
