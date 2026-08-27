@@ -8,7 +8,7 @@
 import Foundation
 import Combine
 
-extension AnyPublisher {
+extension AnyPublisher where Output: Sendable {
     /// Awaits the first emitted value that satisfies `predicate`.
     ///
     /// - Parameters:
@@ -63,7 +63,7 @@ extension AnyPublisher {
 /// settles before ``store(_:)`` hands over the subscription; `first(where:)` sends its value and
 /// then immediately finishes, offering an outcome twice; and cancellation can arrive before the
 /// continuation is attached at all. The lock and the one-shot `isSettled` flag make all three safe.
-private final class FirstValueBox<Value>: @unchecked Sendable {
+private final class FirstValueBox<Value: Sendable>: @unchecked Sendable {
     private let lock = NSLock()
     private var continuation: CheckedContinuation<Value, any Error>?
     private var cancellable: AnyCancellable?

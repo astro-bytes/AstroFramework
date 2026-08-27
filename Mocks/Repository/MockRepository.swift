@@ -11,7 +11,11 @@ import GatewayFoundation
 import UseCaseFoundation
 
 // Get the Local user info
-public class MockRepository<Payload>: Repository {
+
+/// `@unchecked` because the spy flags are plain stored properties. The value it publishes goes
+/// through `CurrentValueSubject`, which is thread-safe; tests read the flags after the work under
+/// test has finished.
+public final class MockRepository<Payload: Sendable>: Repository, @unchecked Sendable {
     var calledRefresh = false
     var calledAsyncRefresh = false
     var calledSet = false

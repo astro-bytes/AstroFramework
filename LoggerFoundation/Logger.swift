@@ -34,7 +34,12 @@ import Foundation
 /// ```swift
 /// Logger.minimumLevel = .warning
 /// ```
-public final class Logger {
+///
+/// ## Thread safety
+///
+/// Safe to call from any thread. All state is guarded by a lock, which is what the `@unchecked`
+/// conformance stands in for.
+public final class Logger: @unchecked Sendable {
 
     /// Singleton pattern shared instance.
     static let shared = Logger()
@@ -143,7 +148,7 @@ public final class Logger {
     }
 
     private let lock = NSLock()
-    private nonisolated(unsafe) var state: State
+    private var state: State
 
     /// Delivery runs here, so interceptors see logs in the order the calls were made and never
     /// concurrently with each other.

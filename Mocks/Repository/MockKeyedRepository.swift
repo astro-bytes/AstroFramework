@@ -9,7 +9,10 @@ import Combine
 import Foundation
 import UseCaseFoundation
 
-public class MockKeyedRepository<Element: Identifiable>: KeyedRepository {
+/// `@unchecked` because the spy flags are plain stored properties. The value it publishes goes
+/// through `CurrentValueSubject`, which is thread-safe; tests read the flags after the work under
+/// test has finished.
+public final class MockKeyedRepository<Element: Identifiable & Sendable>: KeyedRepository, @unchecked Sendable where Element.ID: Sendable {
     public typealias Payload = [Element.ID: Element]
     
     var calledRefresh = false
