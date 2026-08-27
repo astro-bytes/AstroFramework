@@ -152,6 +152,10 @@ subscribing to a remote source, write-through that survives a failed remote upda
 in earlier versions of this README but were never written, and the note is here rather than there
 so nobody plans around them.
 
+## License
+
+MIT. See [LICENSE](LICENSE).
+
 ## Contributing
 
 Every pull request builds each module, builds the package for iOS, runs the tests, and rebuilds
