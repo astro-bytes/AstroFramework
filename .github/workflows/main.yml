@@ -1,28 +1,78 @@
 name: Build Package
 
-on: 
+on:
+  # Was pull_request only, so a commit pushed straight to main went unverified.
+  push:
+    branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
-    name: ${{ matrix.module }} Module Build
+    name: ${{ matrix.module }} (macOS)
     strategy:
       fail-fast: false
       matrix:
-        module: [EntityFoundation, UseCaseFoundation, GatewayFoundation, LoggerFoundation, UIFoundation, UtilityFoundation]
-    runs-on: [macos-latest]
-    steps:
-      - name: "Checkout Repo"
-        uses: actions/checkout@v4
-      - name: Build
-        run: swift build --target ${{ matrix.module }}
-
-  test:
-    name: Unit Tests
-    runs-on: [macos-latest]
+        # TestSettingFoundation was missing from this list: the largest and newest module in the
+        # package, never built by CI.
+        module:
+          - EntityFoundation
+          - GatewayFoundation
+          - LoggerFoundation
+          - TestSettingFoundation
+          - UIFoundation
+          - UseCaseFoundation
+          - UtilityFoundation
+    runs-on: macos-latest
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v4
+
+      - name: Toolchain
+        run: swift --version && xcodebuild -version
+
+      - name: Build
+        run: swift build --target ${{ matrix.module }}
+
+  build-ios:
+    name: iOS build
+    runs-on: macos-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      # `swift build` targets the host, so every job above compiles for macOS. The iOS-only
+      # surface — `navigationBarTitleDisplayMode`, `UIColor`, `fullScreenCover`, `ToolbarSpacer`,
+      # and the whole of `TestSettingsViewModifier`, which is `@available(macOS, unavailable)` —
+      # was never compiled for the platform it is written for.
+      - name: Build for iOS
+        run: |
+          xcodebuild build \
+            -scheme AstroFramework-Package \
+            -destination 'generic/platform=iOS'
+
+  test:
+    name: Unit Tests
+    runs-on: macos-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
       - name: Test
         run: swift test
+
+  warnings:
+    name: No Warnings
+    runs-on: macos-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      # The package builds clean today, in the Swift 6 language mode and with complete concurrency
+      # checking. Keeping it that way is easier than getting back to it.
+      - name: Build with warnings as errors
+        run: swift build --build-tests -Xswiftc -warnings-as-errors
