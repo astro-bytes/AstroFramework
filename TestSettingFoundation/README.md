@@ -16,6 +16,7 @@ does something:
 | `ActionTestSetting` | A button, optionally behind a confirmation |
 | `InputTestSetting` | A button opening a text prompt |
 | `DestinationTestSetting` | A row pushing a screen of your own |
+| `CustomTestSetting` | A row you draw yourself |
 
 ```swift
 struct WebsiteEnvironmentSetting: PickerTestSetting {
@@ -38,6 +39,32 @@ struct WebsiteEnvironmentSetting: PickerTestSetting {
 ```
 
 Only `title` is required. `detail`, `section`, `priority`, `hidden` and `id` all have defaults.
+
+## Drawing your own row
+
+The six built-in row types cover most debug screens. For the ones they do not — a slider, a colour
+well, a live readout — conform to `CustomTestSetting` and return whatever you want:
+
+```swift
+struct RenderScaleSetting: CustomTestSetting {
+    let title = "Render Scale"
+    @Bindable var renderer: Renderer
+
+    func makeRow() -> some View {
+        VStack(alignment: .leading) {
+            Text(title)
+            Slider(value: $renderer.scale, in: 0.5 ... 2)
+        }
+    }
+}
+```
+
+A custom row is checked for before any built-in conformance, so a setting that is both this and a
+`ToggleTestSetting` draws what `makeRow()` returns. It is placed in the list and decorated like any
+other row, so it picks up your row decorator and the section it named.
+
+Precedence among the built-ins is a fixed order — destination, picker, toggle, action, input — not
+a judgement about specificity. A setting conforming to two of them draws the first in that list.
 
 `id` defaults to a value derived from the row's own content, so resolving the same setting twice
 yields the same row identity and SwiftUI keeps the row's state across a re-render. Override it only
@@ -128,3 +155,4 @@ The module was unreleased in practice, so these changes are breaking without a d
 | `TestSettingsView` takes a `configuration` | Optional — it defaults |
 | `TestSettingsViewModifier` takes a `configuration` | Optional — it defaults |
 | `InputTestSettingRow` reports its value on confirm only | Previously it reported once per keystroke, and reported `""` on Cancel |
+| `DestinationTestSetting.destination` is an `associatedtype`, was `AnyView` | Return `some View` and drop the `AnyView(...)` wrapper |

@@ -36,19 +36,64 @@ public struct TestSettingSectionView: View {
 
     @ViewBuilder
     private func row(for setting: any TestSetting) -> some View {
-        // Most specific conformance wins; a setting conforming to none of them is read-only.
-        if let setting = setting as? (any DestinationTestSetting) {
-            DestinationSettingRow(setting)
-        } else if let setting = setting as? (any PickerTestSetting) {
-            PickerSettingRow(setting)
-        } else if let setting = setting as? (any ToggleTestSetting) {
-            ToggleSettingRow(setting)
-        } else if let setting = setting as? (any ActionTestSetting) {
-            ActionTestSettingView(setting)
-        } else if let setting = setting as? (any InputTestSetting) {
-            InputTestSettingRow(setting)
-        } else {
+        switch TestSettingRowKind(for: setting) {
+        case .custom:
+            // Safe: `TestSettingRowKind` reports `.custom` only for this conformance.
+            if let setting = setting as? (any CustomTestSetting) {
+                AnyView(setting.makeRow())
+            }
+        case .destination:
+            if let setting = setting as? (any DestinationTestSetting) {
+                DestinationSettingRow(setting)
+            }
+        case .picker:
+            if let setting = setting as? (any PickerTestSetting) {
+                PickerSettingRow(setting)
+            }
+        case .toggle:
+            if let setting = setting as? (any ToggleTestSetting) {
+                ToggleSettingRow(setting)
+            }
+        case .action:
+            if let setting = setting as? (any ActionTestSetting) {
+                ActionTestSettingView(setting)
+            }
+        case .input:
+            if let setting = setting as? (any InputTestSetting) {
+                InputTestSettingRow(setting)
+            }
+        case .plain:
             TestSettingRow(setting)
+        }
+    }
+}
+
+/// Which row a setting draws.
+///
+/// Split out from the view so the choice can be asserted on directly. It is decided by a fixed
+/// order of conformance checks, and the order is the part that quietly matters: a setting that
+/// conforms to two of these protocols draws the first one listed, not "the most specific" in any
+/// sense the compiler knows about.
+enum TestSettingRowKind: Equatable {
+    /// The setting builds its own row, which beats every built-in kind.
+    case custom
+    case destination
+    case picker
+    case toggle
+    case action
+    case input
+    /// Conforms to none of the specialised protocols: a read-only title and detail.
+    case plain
+
+    init(for setting: any TestSetting) {
+        switch setting {
+        case is any CustomTestSetting: self = .custom
+        case is any DestinationTestSetting: self = .destination
+        case is any PickerTestSetting: self = .picker
+        case is any ToggleTestSetting: self = .toggle
+        case is any ActionTestSetting: self = .action
+        case is any InputTestSetting: self = .input
+        default: self = .plain
         }
     }
 }
