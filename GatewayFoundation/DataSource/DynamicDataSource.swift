@@ -1,6 +1,6 @@
 //
 //  DynamicDataSource.swift
-//  GatewayBasics
+//  GatewayFoundation
 //
 //  Created by Porter McGary on 1/17/24.
 //

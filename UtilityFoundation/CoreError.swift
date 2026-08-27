@@ -1,6 +1,6 @@
 //
 //  CoreError.swift
-//  Utility
+//  UtilityFoundation
 //
 //  Created by Porter McGary on 1/20/24.
 //
