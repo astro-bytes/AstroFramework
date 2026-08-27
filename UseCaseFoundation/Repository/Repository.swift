@@ -15,7 +15,9 @@ import UtilityFoundation
 /// This structurally provides a way to access data from an underlying `DataStore` in a uniform way.
 public protocol Repository<Payload> {
     /// The data with the ability to subscribe to and observe the data's current state.
-    associatedtype Payload
+    ///
+    /// `Sendable` because ``get(within:)`` hands it across a concurrency domain.
+    associatedtype Payload: Sendable
     
     /// The publisher emitting `DataResult` objects.
     var data: AnyPublisher<DataResult<Payload>, Never> { get }

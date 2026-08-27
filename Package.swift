@@ -1,20 +1,18 @@
-// swift-tools-version: 5.9
+// swift-tools-version: 6.2
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
 
 let package = Package(
     name: "AstroFramework",
-    // The 26 line. Spelled as strings because the matching `.v26` cases need PackageDescription
-    // 6.2, and raising swift-tools-version that far would also switch every target to the Swift 6
-    // language mode.
+    // The 26 line, on the Swift 6 language mode.
     platforms: [
-        .macOS("26.0"),
-        .iOS("26.0"),
-        .watchOS("26.0"),
-        .tvOS("26.0"),
-        .macCatalyst("26.0"),
-        .visionOS("26.0")
+        .macOS(.v26),
+        .iOS(.v26),
+        .watchOS(.v26),
+        .tvOS(.v26),
+        .macCatalyst(.v26),
+        .visionOS(.v26)
     ],
     products: [
         // Products define the executables and libraries a package produces, making them visible to other packages.

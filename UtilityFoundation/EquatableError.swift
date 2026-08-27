@@ -15,7 +15,10 @@ public struct EquatableError: Error, Equatable, CustomStringConvertible {
     public let base: Error
     
     /// A closure defining the equality check for the base error.
-    private let equals: (Error) -> Bool
+    ///
+    /// `@Sendable` because `Error` refines `Sendable`, so this struct does too, and every stored
+    /// property has to hold up its end of that.
+    private let equals: @Sendable (any Error) -> Bool
     
     /// Initializes the EquatableError with a base error.
     /// - Parameter base: The base error to be wrapped.

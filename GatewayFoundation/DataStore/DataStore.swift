@@ -14,7 +14,7 @@ import UtilityFoundation
 /// This structurally provides a way to access data from an underlying ``DataStore`` in a uniform way.
 public protocol DataStore<Payload> {
     /// Generic defining the data type used by the repository
-    associatedtype Payload
+    associatedtype Payload: Sendable
     
     /// The data with the ability to subscribe to and observe the data's current state
     var data: AnyPublisher<DataResult<Payload>, Never> { get }

@@ -12,7 +12,7 @@ import UseCaseFoundation
 /// A protocol defining the interface for a data cache.
 public protocol Cacheable<Payload> {
     /// Generic representing the type of data the cache will store.
-    associatedtype Payload
+    associatedtype Payload: Sendable
     
     /// A publisher providing a stream of data results from the cache.
     var data: AnyPublisher<DataResult<Payload>, Never> { get }
