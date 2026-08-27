@@ -54,8 +54,11 @@ to be honest about what they do.
 - `Bundle.appVersion`, `buildVersion` and `fullAppVersion` return `String?`.
 - `Color(hex:)` is failable rather than substituting a fallback colour.
 - `Color.hexValue` returns `String?` and works on every platform.
-- `DataStore` refines `Repository`, and `KeyedDataStore` refines `KeyedRepository`, instead of
-  restating their requirements.
+- `DataStore` and `KeyedDataStore` are replaced by `SynchronousRepository` and
+  `SynchronousKeyedRepository`, which refine `Repository` in UseCaseFoundation. The one thing the
+  old protocols added over `Repository` was a synchronous read — a capability, not a layer, and
+  not a reason to live in another module under a name describing a place. `KeyedRepository` gains
+  the `refresh(by:)` requirements, which are policy.
 - `DestinationTestSetting.destination` is an `associatedtype` rather than `AnyView`.
 - `OSLogInterceptor` writes structured fields through `os.Logger`, with the error and data
   dictionary marked private so they are redacted in release builds.
@@ -69,7 +72,7 @@ to be honest about what they do.
   plaintext only when no cipher is passed.
 - `errorAlert(error:retry:)` and `errorAlert(error:asyncRetry:)`, which took a closure and
   forwarded it nowhere.
-- `CollectionDataStore`, which restated `KeyedDataStore` and had no conformers.
+- `CollectionDataStore`, which restated the keyed data store and had no conformers.
 - `.swiftpm/PackageDeal-Package.xctestplan`, which named six targets that no longer exist.
 
 ### Tests
