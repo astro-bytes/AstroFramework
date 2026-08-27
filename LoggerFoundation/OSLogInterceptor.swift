@@ -50,9 +50,17 @@ struct OSLogInterceptor: Interceptor {
 }
 
 /// A locked cache of `os.Logger` values, keyed by the subsystem and category they were built for.
-private final class LoggerCache: @unchecked Sendable {
+final class LoggerCache: @unchecked Sendable {
     private let lock = NSLock()
     private var loggers: [String: os.Logger] = [:]
+
+    /// How many distinct loggers are held. `os.Logger` is not identity-comparable, so this is how
+    /// reuse is observable at all.
+    var count: Int {
+        lock.lock()
+        defer { lock.unlock() }
+        return loggers.count
+    }
 
     func logger(subsystem: String, category: String) -> os.Logger {
         let key = "\(subsystem)|\(category)"
