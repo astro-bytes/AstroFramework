@@ -8,6 +8,7 @@
 import Combine
 import Foundation
 import UseCaseFoundation
+import UtilityFoundation
 
 /// `@unchecked` because the spy flags are plain stored properties. The value it publishes goes
 /// through `CurrentValueSubject`, which is thread-safe; tests read the flags after the work under
@@ -21,6 +22,8 @@ public final class MockKeyedRepository<Element: Identifiable & Sendable>: KeyedR
     public private(set) var calledSetElement = false
     public private(set) var calledClear = false
     public private(set) var calledClearByID = false
+    public private(set) var calledAsyncRefreshByID = false
+    public private(set) var calledRefreshByID = false
     
     public let subject: CurrentValueSubject<DataResult<Payload>, Never>
     public var data: AnyPublisher<UseCaseFoundation.DataResult<[Element.ID : Element]>, Never> {
@@ -52,6 +55,18 @@ public final class MockKeyedRepository<Element: Identifiable & Sendable>: KeyedR
     public func refresh() async -> UseCaseFoundation.DataResult<[Element.ID : Element]> {
         calledAsyncRefresh = true
         return subject.value
+    }
+
+    public func refresh(by id: Element.ID) async -> DataResult<Element> {
+        calledAsyncRefreshByID = true
+        guard let value = subject.value.payload?[id] else {
+            return .failure(cachedData: nil, error: CoreError.notFound)
+        }
+        return .success(data: value)
+    }
+
+    public func refresh(by id: Element.ID) {
+        calledRefreshByID = true
     }
     
     public func set(_ payload: [Element.ID : Element]) {
