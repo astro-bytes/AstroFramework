@@ -1,5 +1,5 @@
 //
-//  MockKeyedDataStore.swift
+//  MockSynchronousKeyedRepository.swift
 //  Mocks
 //
 //  Created by Porter McGary on 2/9/24.
@@ -8,13 +8,12 @@
 import Foundation
 import Combine
 import UseCaseFoundation
-import GatewayFoundation
 import UtilityFoundation
 
 /// `@unchecked` because the spy flags are plain stored properties. The value it publishes goes
 /// through `CurrentValueSubject`, which is thread-safe; tests read the flags after the work under
 /// test has finished.
-public final class MockKeyedDataStore<Element: Identifiable & Sendable>: KeyedDataStore, @unchecked Sendable where Element.ID: Sendable {
+public final class MockSynchronousKeyedRepository<Element: Identifiable & Sendable>: SynchronousKeyedRepository, @unchecked Sendable where Element.ID: Sendable {
     public typealias Payload = [Element.ID: Element]
     
     public private(set) var calledSetElement = false
