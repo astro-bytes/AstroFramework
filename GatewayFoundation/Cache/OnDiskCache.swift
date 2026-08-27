@@ -5,6 +5,7 @@
 //  Created by Porter McGary on 1/17/24.
 //
 
+import CryptoKit
 import Foundation
 import LoggerFoundation
 import UseCaseFoundation
@@ -15,6 +16,10 @@ import UtilityFoundation
 /// The payload and the date it was written travel together in one file. Keeping the date beside
 /// the value rather than in `UserDefaults` means clearing the cache is a single delete that cannot
 /// half-succeed, and there is no separately-keyed date to fall out of step with the file.
+///
+/// Without a ``CacheCipher`` the file is plaintext JSON in the caches directory. Pass one to
+/// change that — including the write date, which is inside the encrypted envelope rather than
+/// beside it, so an observer cannot tell when a value was cached or how often it refreshes.
 public class OnDiskCache<Payload: Codable>: InMemoryCache<Payload> {
     /// What actually goes in the file: the payload, plus when it was written.
     private struct Envelope: Codable {
@@ -28,16 +33,23 @@ public class OnDiskCache<Payload: Codable>: InMemoryCache<Payload> {
     /// The unique name identifying this cache.
     let name: String
 
+    /// Transforms the encoded payload on its way to and from disk. `nil` writes plaintext JSON.
+    let cipher: (any CacheCipher)?
+
     /// Creates a datastore with an on-disk expirable cache.
     /// - Parameters:
     ///   - name: The name used for the cache file, defaults to the payload's type name.
     ///   - lifetime: The time that the cache has to live before becoming expired.
+    ///   - cipher: Encrypts the payload on disk. `nil`, the default, writes plaintext JSON — fine
+    ///     for data that is merely expensive to fetch, wrong for anything sensitive.
     ///   - invalidateImmediately: Flag indicating if the cache should be immediately invalidated and removed from disk when initialized.
     public init(name: String = "\(Payload.self)",
                 lifetime: TimeInterval,
+                cipher: (any CacheCipher)? = nil,
                 invalidateImmediately: Bool = false) {
         self.filename = "\(name).json"
         self.name = name
+        self.cipher = cipher
         super.init(lifetime: lifetime)
 
         guard !invalidateImmediately else {
@@ -63,9 +75,13 @@ public class OnDiskCache<Payload: Codable>: InMemoryCache<Payload> {
             return
         }
 
-        let data = try JSONEncoder().encode(Envelope(cachedDate: cachedDate, payload: payload))
-        let url = try cacheFileURL()
-        try data.write(to: url)
+        let encoded = try JSONEncoder().encode(Envelope(cachedDate: cachedDate, payload: payload))
+
+        // A cipher that throws fails the write. Falling back to plaintext here would be the same
+        // lie the old `encrypted` flag told.
+        let data = try cipher.map { try $0.encrypt(encoded) } ?? encoded
+
+        try data.write(to: cacheFileURL())
     }
 
     /// Clears the in-memory value and deletes the backing file.
@@ -79,8 +95,8 @@ public class OnDiskCache<Payload: Codable>: InMemoryCache<Payload> {
     /// - Returns: The result to adopt, and the date the value was originally written.
     func read() -> (DataResult<Payload>, Date?) {
         do {
-            let url = try cacheFileURL()
-            let data = try Data(contentsOf: url)
+            let stored = try Data(contentsOf: cacheFileURL())
+            let data = try cipher.map { try $0.decrypt(stored) } ?? stored
             let envelope = try JSONDecoder().decode(Envelope.self, from: data)
 
             // `isExpired` reads `cachedDate`, which is not set yet — so ask the date directly.
@@ -90,12 +106,13 @@ public class OnDiskCache<Payload: Codable>: InMemoryCache<Payload> {
                 : .success(data: envelope.payload)
 
             return (result, envelope.cachedDate)
-        } catch is DecodingError {
-            // The file is corrupt, or was written by an older format. Either way it is unusable,
-            // so drop it and start over rather than reporting an error the caller cannot act on.
-            try? clear()
-            return (.uninitialized, nil)
         } catch CocoaError.fileReadNoSuchFile {
+            return (.uninitialized, nil)
+        } catch is DecodingError, is CryptoKitError, is AESGCMCipher.CipherError {
+            // Unusable: corrupt, written by an older format, or sealed under a key we no longer
+            // hold. Drop it and start over rather than reporting an error the caller cannot act
+            // on. A rotated key costs a refetch, not a crash.
+            try? clear()
             return (.uninitialized, nil)
         } catch {
             Logger.log(.warning, error: error)
