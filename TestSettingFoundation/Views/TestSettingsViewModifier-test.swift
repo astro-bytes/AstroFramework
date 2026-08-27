@@ -32,7 +32,10 @@ public struct TestSettingsViewModifier: ViewModifier {
                 .toolbar {
                     ToolbarItem(placement: configuration.toolbar.placement) { button }
 
-                    if configuration.toolbar.showsTrailingSpacer {
+                    // `ToolbarSpacer` is newer than the package's floor, so below it the button
+                    // simply sits where the app's own toolbar content leaves it.
+                    if configuration.toolbar.showsTrailingSpacer,
+                       #available(iOS 26, macCatalyst 26, tvOS 26, watchOS 26, visionOS 26, *) {
                         ToolbarSpacer(.fixed, placement: configuration.toolbar.placement)
                     }
                 }

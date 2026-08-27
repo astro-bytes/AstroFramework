@@ -84,7 +84,7 @@ would otherwise have to fork the module to change:
 | `tint` | Applied to the presented list and everything in it |
 | `dynamicTypeSizes` | Clamp for the whole screen |
 | `usesZoomTransition` | Whether the list animates out of its toolbar button |
-| `toolbar` | Placement, label, symbol, trailing spacer |
+| `toolbar` | Placement, label, symbol, and a trailing spacer where the OS has one |
 | `emptyState` | Copy for "nothing registered" |
 | `root` / `destination` / `row` | View decorators — see below |
 
