@@ -13,7 +13,9 @@ import SwiftUI
 /// Takes the settings it draws rather than reaching for a container, so it can be previewed and
 /// tested with a literal.
 public struct TestSettingsView: View {
-    private let sectionKeys: [TestSettingSection]
+    /// The section headings in the order they are drawn: by priority, ties alphabetical.
+    /// Sorted once here rather than on every redraw.
+    let sectionKeys: [TestSettingSection]
     private let sections: TestSettingSections
     private let configuration: TestSettingsConfiguration
 

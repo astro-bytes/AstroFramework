@@ -1,5 +1,5 @@
 //
-//  UserRepository.swift
+//  MockRepository.swift
 //  Mocks
 //
 //  Created by Porter McGary on 1/17/24.
@@ -16,10 +16,10 @@ import UseCaseFoundation
 /// through `CurrentValueSubject`, which is thread-safe; tests read the flags after the work under
 /// test has finished.
 public final class MockRepository<Payload: Sendable>: Repository, @unchecked Sendable {
-    var calledRefresh = false
-    var calledAsyncRefresh = false
-    var calledSet = false
-    var calledClear = false
+    public private(set) var calledRefresh = false
+    public private(set) var calledAsyncRefresh = false
+    public private(set) var calledSet = false
+    public private(set) var calledClear = false
     
     public let publisher: CurrentValueSubject<DataResult<Payload>, Never>
     

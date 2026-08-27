@@ -28,6 +28,20 @@ public protocol KeyedRepository<Element>: Repository {
     ///
     /// - Parameter id: The identifier of the element to clear.
     func clear(by id: Element.ID)
+
+    /// Forces one element to be pulled from the source rather than read from the cache.
+    ///
+    /// The by-identifier counterpart of ``Repository/refresh()``, and policy for the same reason:
+    /// refreshing a single element rather than the whole collection is a decision about where data
+    /// comes from and when, which is what a repository is for.
+    /// - Parameter id: The identifier of the element to refresh.
+    /// - Returns: The element's value after the refresh.
+    func refresh(by id: Element.ID) async -> DataResult<Element>
+
+    /// Forces one element to be pulled from the source, reporting the result through
+    /// ``Repository/data``.
+    /// - Parameter id: The identifier of the element to refresh.
+    func refresh(by id: Element.ID)
 }
 
 /// Extension providing a method to retrieve an element from the keyed repository by its identifier.

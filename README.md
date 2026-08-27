@@ -1,50 +1,171 @@
-# Package Deal
-Submodules that contain reusable base components in different areas of a project; namely Entities, UseCases, Gateways, and UI.
+# AstroFramework
 
-### Type Erasure
- There are some components that will type erase since swift still has a problem when values need to be equatable or hashable and so on. [Reference to Stack-over Flow](https://stackoverflow.com/questions/76449655/swift-is-there-still-a-use-case-for-type-erasure-since-the-introduction-of-prim)
+Reusable foundations for the layers of an app: entities, use cases, gateways, UI, logging, and a
+debug settings screen. Seven independent library products, no third-party dependencies — depend on
+the ones you want.
+
+## Requirements
+
+| | |
+|---|---|
+| Swift | 6.2 (the package builds in the Swift 6 language mode) |
+| Platforms | iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26, Mac Catalyst 26 |
+
+## Installation
+
+```swift
+dependencies: [
+    .package(url: "https://github.com/astro-bytes/AstroFramework.git", from: "0.4.0")
+]
+```
+
+Then take only the products a target needs:
+
+```swift
+.target(
+    name: "MyFeature",
+    dependencies: [
+        .product(name: "UseCaseFoundation", package: "AstroFramework"),
+        .product(name: "UIFoundation", package: "AstroFramework"),
+    ]
+)
+```
 
 ## Modules
-- [Gateway Basics](#GatewayBasics)
 
-## Gateway Basics
-This module contains basic protocols and default implementations for a gateway layer.
+| Product | What it holds | Depends on |
+|---|---|---|
+| [`EntityFoundation`](#entityfoundation) | The `Entity` protocol | — |
+| [`UtilityFoundation`](#utilityfoundation) | Errors, and extensions to the standard library | `LoggerFoundation` |
+| [`LoggerFoundation`](#loggerfoundation) | Logging with pluggable interceptors | — |
+| [`UseCaseFoundation`](#usecasefoundation) | `DataResult`, the repository ports, use-case protocols | `EntityFoundation`, `UtilityFoundation` |
+| [`GatewayFoundation`](#gatewayfoundation) | Caches and data sources | `LoggerFoundation`, `UtilityFoundation`, `UseCaseFoundation` |
+| [`UIFoundation`](#uifoundation) | SwiftUI helpers and error presentation | `LoggerFoundation`, `UtilityFoundation` |
+| [`TestSettingFoundation`](TestSettingFoundation/README.md) | A debug settings screen | — |
+| `Mocks` | Fakes for the protocols above, for your tests | `GatewayFoundation`, `UseCaseFoundation` |
 
-### Repository
-A Design pattern known as the "Repository Pattern." 
-The Repository Pattern is a structural pattern that provides a way to access and manage data stored in a data store (such as a database) in a standardized manner. 
-It abstracts the data access layer and provides a set of methods to interact with the underlying data.
+### EntityFoundation
 
+`Entity` marks a domain type: `Identifiable`, `Equatable`, `Hashable` and `Sendable`, with a
+`Sendable` ID. An entity moves off a background task and into a view as a matter of course, which
+is what the `Sendable` requirement is for. For the value types that conform, it costs nothing.
 
-There are two types of Repositories:
-1. Read Only - Which reads data from a [DataStore](#DataStore), typically a REST API:
-  - Pulls every time the repository is initialized into memory.
-  - Pulls from that source at specific intervals, generally when the cache is expired. In the background before the value is needed, this is intended to decrease wait times.
-  - Able to force update on command when cache is not yet expired.
-2. Read and Write - Which reads/writes from/to a [DataStore](#DataStore), typically a Remote DB.
-  - Does everything that the Read-Only Repository.
-  - Able to subscribe to updates from source - Publishes the new current value on update. ie Remote DB value changes then repository value is changed
-  - Send request to change a value in the source:
-    - Failure to change value should not impede local cached values from changing and updating to the right value.
-    - Success does not send more than one emitted publication of the new value out the door.
+```swift
+struct User: Entity, Codable {
+    let id: UUID
+    var name: String
+}
+```
 
-### Requirements
-#### Get Data
-- The data follows the Publisher/Subscriber Pattern
-  - Publisher is able to be subscribed to
-  - When underlying data changes a update is sent to subscribers
-- The data can be in three states: Loading, Success, Failure:
-  - Loading: the data has not yet been initialized from the source or is in the process of being loaded from the source
-  - Success: the data is valid from the cache or straight from the source
-  - Failure: the cached value is presented (given the cache is valid), and error is presented
-- The data can be refreshed, when the data is refreshed the publisher emits the new current value
-- Refreshing the repository can be both synchronous and asynchronous 
-  - When Asynchronous: after the data is updated the current value is returned
-  - When Synchronous: no value is given back and the user is expected to use the subscription to get the new current value
+### UtilityFoundation
 
-#### Set Data
-- 
+`CoreError` (`notFound`, `timeout`), `EquatableError` for comparing errors that are not themselves
+`Equatable`, and extensions: async `map`/`compactMap`/`reduce` on `Collection`, `TimeInterval`
+constants, `Result.value`/`.error`, `Optional.isNil`, `URL.isDirectory`/`.isFile`, and
+`Bundle.appVersion`.
 
-### Data Store
+`AnyPublisher.first(timeoutAfter:where:)` awaits the first value matching a predicate, throwing
+`CoreError.timeout` if none arrives in time.
 
-### Cache
+### LoggerFoundation
+
+```swift
+Logger.log(.info, msg: "Signed in.")
+Logger.log(.warning, error: error, data: ["endpoint": url.absoluteString])
+```
+
+Logs go to every registered interceptor, on one serial queue, in the order the calls were made. A
+`DEBUG` build gets an interceptor writing to the unified logging system; any other build starts
+empty, so an app chooses where its logs go.
+
+```swift
+let token = Logger.apply(interceptor: MyInterceptor())
+Logger.remove(token)
+
+Logger.minimumLevel = .warning   // drops anything less severe before delivery
+```
+
+Levels are values, so an app can add its own — a level's `priority` decides where it sorts against
+the built-in four.
+
+### UseCaseFoundation
+
+`DataResult` is what a repository publishes: `uninitialized`, `loading`, `success`, or `failure` —
+with the last two able to carry a cached payload, so a view can keep showing something usable while
+a refresh is in flight or after one fails.
+
+`Repository` is the port a use case reads through, and `KeyedRepository` its by-identifier
+counterpart. `get(within:)` awaits the first non-loading result and unwraps it.
+
+A repository that already holds its value — one backed by a cache in memory — also conforms to
+`SynchronousRepository`, which adds a `get()` that answers without awaiting. That is a capability
+rather than a layer, which is why it sits here beside `Repository` rather than in the gateway
+module.
+
+`UseCase` and `AsyncUseCase` are one-method protocols for a unit of application logic.
+
+### GatewayFoundation
+
+Where data comes from, and how it is kept.
+
+`InMemoryCache` and `OnDiskCache` are expirable caches. The on-disk one keeps the payload and the
+date it was written together in one file under the caches directory.
+
+By default that file is plaintext JSON. Pass a `CacheCipher` to change it:
+
+```swift
+let cache = OnDiskCache<Session>(lifetime: .to(hours: 1), cipher: AESGCMCipher(key: key))
+```
+
+`AESGCMCipher` covers the common case; conform your own type for anything else. The key is yours
+to supply and to manage — where it lives and when it is readable is app policy, not something a
+framework should decide for you. A key you no longer hold costs a refetch, not a crash: the cache
+treats an unreadable file as corrupt and starts over.
+
+The `DataSource` family — `DataSource`, `DynamicDataSource`, `MutableDataSource`,
+`PublishableDataSource`, `IdentifiablePublishableDataSource` — describes where a store gets its
+data from. These are protocols only; the concrete repositories that would tie a cache to a data
+source are not written yet.
+
+### UIFoundation
+
+`AsyncButton` runs an async action, disables itself and shows a progress indicator while it does,
+and presents anything thrown.
+
+```swift
+AsyncButton("Save") { try await store.save(draft) }
+```
+
+`.errorAlert(error:)` presents an optional error. Conform an error to `DisplayableError` to choose
+its wording, `ActionableError` to offer a recovery button, `AsyncActionableError` when that
+recovery is asynchronous. `.reportError { }` supplies the Report button's action.
+
+Also `Color(hex:)`, `Color.hexValue`, colour lightening and darkening, `View.isHidden(_:)` and
+`View.if`.
+
+### Type erasure
+
+Some components erase types, because Swift still cannot express certain constraints when values
+have to be `Equatable` or `Hashable` —
+[background](https://stackoverflow.com/questions/76449655/swift-is-there-still-a-use-case-for-type-erasure-since-the-introduction-of-prim).
+
+## What is not built yet
+
+The gateway layer is protocols and two caches. The concrete repositories — polling on an interval,
+subscribing to a remote source, write-through that survives a failed remote update — are described
+in earlier versions of this README but were never written, and the note is here rather than there
+so nobody plans around them.
+
+## License
+
+MIT. See [LICENSE](LICENSE).
+
+## Contributing
+
+Every pull request builds each module, builds the package for iOS, runs the tests, and rebuilds
+with warnings as errors. The package is warning-free in the Swift 6 language mode and with
+`-strict-concurrency=complete`; please keep it that way.
+
+```bash
+swift test
+```

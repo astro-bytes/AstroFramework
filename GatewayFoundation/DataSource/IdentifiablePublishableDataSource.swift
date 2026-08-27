@@ -1,6 +1,6 @@
 //
 //  IdentifiablePublishableDataSource.swift
-//  GatewayBasics
+//  GatewayFoundation
 //
 //  Created by Porter McGary on 1/23/24.
 //

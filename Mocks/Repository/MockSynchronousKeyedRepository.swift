@@ -1,5 +1,5 @@
 //
-//  MockKeyedDataStore.swift
+//  MockSynchronousKeyedRepository.swift
 //  Mocks
 //
 //  Created by Porter McGary on 2/9/24.
@@ -8,27 +8,26 @@
 import Foundation
 import Combine
 import UseCaseFoundation
-import GatewayFoundation
 import UtilityFoundation
 
 /// `@unchecked` because the spy flags are plain stored properties. The value it publishes goes
 /// through `CurrentValueSubject`, which is thread-safe; tests read the flags after the work under
 /// test has finished.
-public final class MockKeyedDataStore<Element: Identifiable & Sendable>: KeyedDataStore, @unchecked Sendable where Element.ID: Sendable {
+public final class MockSynchronousKeyedRepository<Element: Identifiable & Sendable>: SynchronousKeyedRepository, @unchecked Sendable where Element.ID: Sendable {
     public typealias Payload = [Element.ID: Element]
     
-    var calledSetElement = false
-    var calledClearByID = false
-    var calledRefresh = false
-    var calledAsyncRefresh = false
-    var calledAsyncRefreshByID = false
-    var calledRefreshByID = false
-    var calledSet = false
-    var calledClear = false
-    var calledGet = false
-    var calledGetID = false
+    public private(set) var calledSetElement = false
+    public private(set) var calledClearByID = false
+    public private(set) var calledRefresh = false
+    public private(set) var calledAsyncRefresh = false
+    public private(set) var calledAsyncRefreshByID = false
+    public private(set) var calledRefreshByID = false
+    public private(set) var calledSet = false
+    public private(set) var calledClear = false
+    public private(set) var calledGet = false
+    public private(set) var calledGetID = false
     
-    let subject: CurrentValueSubject<DataResult<Payload>, Never>
+    public let subject: CurrentValueSubject<DataResult<Payload>, Never>
     
     public var data: AnyPublisher<UseCaseFoundation.DataResult<Payload>, Never> {
         subject.eraseToAnyPublisher()

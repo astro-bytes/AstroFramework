@@ -6,9 +6,24 @@
 //
 
 import SwiftUI
+import UtilityFoundation
 
 extension View {
     /// Applies the given transform if the given condition evaluates to `true`.
+    ///
+    /// - Important: The two branches are structurally different views, so flipping `condition`
+    ///   changes the subtree's identity — SwiftUI tears down what was there and builds the other
+    ///   branch fresh, taking any `@State`, `@FocusState` and in-flight animation with it. That is
+    ///   invisible for a leaf like `.foregroundStyle`, and a real bug for anything holding state.
+    ///
+    ///   Prefer a modifier that takes the condition itself — `.opacity`, `.disabled`, `.hidden` —
+    ///   or a modifier applied unconditionally with a conditional value:
+    ///
+    ///   ```swift
+    ///   // Instead of: .if(isEmphasised) { $0.foregroundStyle(.tint) }
+    ///   .foregroundStyle(isEmphasised ? AnyShapeStyle(.tint) : AnyShapeStyle(.primary))
+    ///   ```
+    ///
     /// - Parameters:
     ///   - condition: The condition to evaluate.
     ///   - transform: The transform to apply to the source `View`.
@@ -20,26 +35,19 @@ extension View {
             self
         }
     }
-    
-    /// Applies the given transform if the given condition evaluates to `true`.
+
+    /// Applies the given transform if the given value is non-`nil`, handing it to the transform.
+    ///
+    /// - Important: Carries the same identity caveat as ``if(_:transform:)-(Bool,_)``: the subtree
+    ///   is rebuilt when `value` changes between `nil` and non-`nil`.
+    ///
     /// - Parameters:
-    ///   - condition: The conditional value.
+    ///   - value: The conditional value.
     ///   - transform: The transform to apply to the source `View`.
-    /// - Returns: Either the original `View` or the modified `View` if the condition is `true`.
+    /// - Returns: Either the original `View` or the modified `View` if the value is non-`nil`.
     @ViewBuilder public func `if`<Content: View, Arg>(_ value: Arg?, transform: (Self, Arg) -> Content) -> some View {
         if let value {
             transform(self, value)
-        } else {
-            self
-        }
-    }
-    
-    // TODO: Add Comments
-    // TODO: Test that this works appropriately
-    // TODO: Make Public if this works right
-    @ViewBuilder func `if`<Argument>(_ args: Argument?..., @ViewBuilder transform: (Self, [Argument]) -> some View) -> some View {
-        if args.allSatisfy({ $0.isNotNil }) {
-            transform(self, args.compactMap { $0 })
         } else {
             self
         }

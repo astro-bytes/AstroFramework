@@ -1,6 +1,6 @@
 //
-//  Cache.swift
-//  GatewayBasics
+//  Cacheable.swift
+//  GatewayFoundation
 //
 //  Created by Joshua Bee on 1/17/24.
 //
