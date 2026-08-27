@@ -59,6 +59,10 @@ to be honest about what they do.
   old protocols added over `Repository` was a synchronous read — a capability, not a layer, and
   not a reason to live in another module under a name describing a place. `KeyedRepository` gains
   the `refresh(by:)` requirements, which are policy.
+- The `DataSource` family settles on one convention — asynchronous, failing by throwing. It used
+  three across four sibling protocols: `DataSource` returned a `Result` synchronously,
+  `DynamicDataSource` threw, and `MutableDataSource` returned a `Result` asynchronously while its
+  writes threw.
 - `DestinationTestSetting.destination` is an `associatedtype` rather than `AnyView`.
 - `OSLogInterceptor` writes structured fields through `os.Logger`, with the error and data
   dictionary marked private so they are redacted in release builds.
@@ -77,10 +81,22 @@ to be honest about what they do.
 
 ### Tests
 
-172 tests, up from 84. UIFoundation had 0% line coverage and TestSettingFoundation 8.7%; both are
-covered now. The placeholder tests are gone — `testExample()` bodies that asserted nothing, an
+195 tests, up from 84. Line coverage is 58.7%, up from 36.6%: UIFoundation was at 0% and is at
+43%, TestSettingFoundation was at 8.7% and is at 20%, and LoggerFoundation is back to 100% after
+the rework doubled its size.
+
+The placeholder tests are gone — `testExample()` bodies that asserted nothing, an
 `XCTAssertTrue(true)`, and three tests that asserted only inside `catch` and so passed when nothing
-was thrown. The suite is clean under `--sanitize=thread`.
+was thrown. Test timeouts dropped from 5s to 1s, so a regression in the read path shows up as a
+failing test rather than a slow suite. The suite is clean under `--sanitize=thread`.
+
+### Still outstanding
+
+- The gateway layer's concrete repositories — interval polling, remote subscription, write-through
+  — remain unwritten. The protocols are there and the README says plainly that the implementations
+  are not.
+- Tests are XCTest throughout. `swift-testing` is available and would suit new tests better,
+  particularly its `.timeLimit` trait.
 
 ## 0.3.0 and earlier
 

@@ -7,11 +7,13 @@
 
 import Foundation
 
-// TODO: It would be nice if this was able to be a data source as well... or extend it
-/// A protocol for mutable data sources with Payload management capabilities.
+/// A ``DataSource`` that can also be written to.
+///
+/// Not a refinement of ``DataSource``: that protocol fetches one payload, while this one fetches
+/// elements by identifier and all of them at once. The two `fetch` requirements would collide.
 public protocol MutableDataSource<MutablePayload> {
     /// Generic type representing the Type of underlying data at the source
-    associatedtype MutablePayload: Identifiable
+    associatedtype MutablePayload: Identifiable & Sendable where MutablePayload.ID: Sendable
     
     /// Instantiates ``DataSource`` instance. If the instance exists nothing is done.
     func initialize() async throws
@@ -27,12 +29,16 @@ public protocol MutableDataSource<MutablePayload> {
     /// - Parameter payload: the object being updated in the source
     func update(_ payload: MutablePayload) async throws
     
-    /// - Returns a specific ``MutablePayload`` instance from source.
+    /// Fetches a specific ``MutablePayload`` instance from the source.
     /// - Parameter id: identifier tied to the payload value fetched from source
-    func fetch(id: MutablePayload.ID) async -> Result<MutablePayload, Error>
-    
-    /// - Returns Fetches all ``MutablePayload`` instances from source.
-    func fetch() async -> Result<[MutablePayload.ID: MutablePayload], Error>
+    /// - Returns: The fetched element.
+    /// - Throws: Whatever the underlying source failed with.
+    func fetch(id: MutablePayload.ID) async throws -> MutablePayload
+
+    /// Fetches all ``MutablePayload`` instances from the source.
+    /// - Returns: Every element, keyed by identifier.
+    /// - Throws: Whatever the underlying source failed with.
+    func fetch() async throws -> [MutablePayload.ID: MutablePayload]
     
     /// Removes a specific ``MutablePayload`` from the source.
     /// - Parameter id: identifier tied to the payload value removed from source
