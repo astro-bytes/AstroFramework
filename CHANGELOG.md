@@ -56,6 +56,10 @@ to be honest about what they do.
 - `Color.hexValue` returns `String?` and works on every platform.
 - `DataStore` refines `Repository`, and `KeyedDataStore` refines `KeyedRepository`, instead of
   restating their requirements.
+- The `DataSource` family settles on one convention — asynchronous, failing by throwing. It used
+  three across four sibling protocols: `DataSource` returned a `Result` synchronously,
+  `DynamicDataSource` threw, and `MutableDataSource` returned a `Result` asynchronously while its
+  writes threw.
 - `DestinationTestSetting.destination` is an `associatedtype` rather than `AnyView`.
 - `OSLogInterceptor` writes structured fields through `os.Logger`, with the error and data
   dictionary marked private so they are redacted in release builds.

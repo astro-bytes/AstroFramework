@@ -13,7 +13,7 @@ import Foundation
 public protocol IdentifiablePublishableDataSource<IdentifiableOutput> {
     
     /// The associated type representing the payload that is identifiable.
-    associatedtype IdentifiableOutput: Identifiable
+    associatedtype IdentifiableOutput: Identifiable & Sendable
     
     /// Returns a publisher for the specified identifier.
     /// - Parameter id: The identifier of the payload.
