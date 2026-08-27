@@ -1,6 +1,6 @@
 //
 //  Result+Extension.swift
-//  Utility
+//  UtilityFoundation
 //
 //  Created by Porter McGary on 1/22/24.
 //

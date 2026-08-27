@@ -1,6 +1,6 @@
 //
 //  TimeInterval+Extension.swift
-//  Utility
+//  UtilityFoundation
 //
 //  Created by Porter McGary on 1/19/24.
 //
