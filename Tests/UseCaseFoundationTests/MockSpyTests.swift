@@ -58,8 +58,8 @@ final class MockSpyTests: XCTestCase {
         XCTAssertNil(repository.subject.value.payload?[User.johnDoe.id])
     }
 
-    func testKeyedDataStoreReadsAnElementByID() {
-        let store = MockKeyedDataStore<User>(.success(data: [User.johnDoe.id: .johnDoe]))
+    func testSynchronousKeyedRepositoryReadsAnElementByID() {
+        let store = MockSynchronousKeyedRepository<User>(.success(data: [User.johnDoe.id: .johnDoe]))
 
         XCTAssertEqual(store.get(by: User.johnDoe.id).payload, .johnDoe)
         XCTAssertTrue(store.calledGetID)
