@@ -38,6 +38,11 @@ let package = Package(
         .library(
             name: "UtilityFoundation",
             targets: ["UtilityFoundation"]),
+        // Shipped so apps can build against the same fakes this package tests with, rather than
+        // writing their own conformances to protocols that already have them.
+        .library(
+            name: "Mocks",
+            targets: ["Mocks"]),
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.

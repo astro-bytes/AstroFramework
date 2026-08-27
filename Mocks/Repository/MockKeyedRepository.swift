@@ -15,14 +15,14 @@ import UseCaseFoundation
 public final class MockKeyedRepository<Element: Identifiable & Sendable>: KeyedRepository, @unchecked Sendable where Element.ID: Sendable {
     public typealias Payload = [Element.ID: Element]
     
-    var calledRefresh = false
-    var calledAsyncRefresh = false
-    var calledSet = false
-    var calledSetElement = false
-    var calledClear = false
-    var calledClearByID = false
+    public private(set) var calledRefresh = false
+    public private(set) var calledAsyncRefresh = false
+    public private(set) var calledSet = false
+    public private(set) var calledSetElement = false
+    public private(set) var calledClear = false
+    public private(set) var calledClearByID = false
     
-    let subject: CurrentValueSubject<DataResult<Payload>, Never>
+    public let subject: CurrentValueSubject<DataResult<Payload>, Never>
     public var data: AnyPublisher<UseCaseFoundation.DataResult<[Element.ID : Element]>, Never> {
         subject.eraseToAnyPublisher()
     }
