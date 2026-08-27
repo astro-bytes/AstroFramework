@@ -1,6 +1,6 @@
 //
 //  Level.swift
-//  Logger
+//  LoggerFoundation
 //
 //  Created by Porter McGary on 1/18/24.
 //
@@ -13,11 +13,12 @@ extension Logger {
     ///
     /// Types conforming to `LogLevel` can be passed directly to `Logger.log(_:...)`.
     /// You can extend `Logger.Level` with static properties or create custom conforming types to define domain-specific log levels.
-    public struct Level: Equatable, Hashable {
+    public struct Level: Equatable, Hashable, Sendable {
         /// The string representation of the log level (e.g., "info", "debug", "custom").
         public let name: String
         
-        /// The priority level used to determine log severity or filter threshold.
+        /// The priority level used to determine log severity, and compared against
+        /// ``Logger/minimumLevel`` to decide whether a log is delivered at all.
         /// Higher values indicate greater severity.
         public let priority: Int
         
@@ -50,4 +51,12 @@ public extension Logger.Level {
     
     /// Used to indicate there is a problem that needs immediate or quick action to correct
     static let critical = Self(name: "critical", priority: 3, osType: .fault)
+}
+
+extension Logger.Level: Comparable {
+    /// Ordered by ``priority``, so ``Logger/minimumLevel`` can be written as a comparison and a
+    /// custom level slots in between the built-in ones by choosing a priority between theirs.
+    public static func < (lhs: Self, rhs: Self) -> Bool {
+        lhs.priority < rhs.priority
+    }
 }
