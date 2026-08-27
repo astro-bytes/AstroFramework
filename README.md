@@ -107,8 +107,16 @@ store that already holds its value; `KeyedDataStore` does the same for `KeyedRep
 `InMemoryCache` and `OnDiskCache` are expirable caches. The on-disk one keeps the payload and the
 date it was written together in one file under the caches directory.
 
-> **Note**
-> Cached payloads are stored as plaintext JSON. Do not put credentials or personal data in one.
+By default that file is plaintext JSON. Pass a `CacheCipher` to change it:
+
+```swift
+let cache = OnDiskCache<Session>(lifetime: .to(hours: 1), cipher: AESGCMCipher(key: key))
+```
+
+`AESGCMCipher` covers the common case; conform your own type for anything else. The key is yours
+to supply and to manage — where it lives and when it is readable is app policy, not something a
+framework should decide for you. A key you no longer hold costs a refetch, not a crash: the cache
+treats an unreadable file as corrupt and starts over.
 
 The `DataSource` family — `DataSource`, `DynamicDataSource`, `MutableDataSource`,
 `PublishableDataSource`, `IdentifiablePublishableDataSource` — describes where a store gets its
