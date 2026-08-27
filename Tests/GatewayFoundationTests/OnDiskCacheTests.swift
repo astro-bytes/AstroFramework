@@ -1,6 +1,6 @@
 //
 //  OnDiskCacheTests.swift
-//  GatewayBasicsTests
+//  GatewayFoundationTests
 //
 //  Created by Porter McGary on 1/17/24.
 //
@@ -9,6 +9,8 @@ import XCTest
 @testable import GatewayFoundation
 import LoggerFoundation
 import Mocks
+import UseCaseFoundation
+import UtilityFoundation
 
 final class OnDiskCacheTests: XCTestCase {
     
@@ -122,5 +124,95 @@ final class OnDiskCacheTests: XCTestCase {
         XCTAssertFalse(url.isFile)
         XCTAssertThrowsError(try Data(contentsOf: url))
     }
-    
+
+    // MARK: Expiry
+
+    /// Loading a cache must not restart its expiry clock.
+    ///
+    /// `init` used to hand the loaded value to `super.set`, which stamps `cachedDate` with the
+    /// load time. Every construction pushed the expiry forward by a full lifetime, so a cache
+    /// re-created more often than its lifetime never went stale and never refetched.
+    func test_ReloadingDoesNotRenewTheExpiryClock() throws {
+        let name = "renewal-\(UUID().uuidString)"
+        let first = OnDiskCache<User>(name: name, lifetime: 30)
+        try first.set(.success(data: .johnDoe))
+        let writtenAt = try XCTUnwrap(first.cachedDate)
+
+        let second = OnDiskCache<User>(name: name, lifetime: 30)
+
+        XCTAssertEqual(second.cachedDate, writtenAt, "reloading moved the expiry clock forward")
+        try second.clear()
+    }
+
+    /// The end the renewal bug was hiding: a value written outside its lifetime reads as expired,
+    /// however many times the cache has been constructed in between.
+    func test_ValueOlderThanItsLifetimeIsExpiredAfterRepeatedReloads() async throws {
+        let name = "expiry-\(UUID().uuidString)"
+        let writer = OnDiskCache<User>(name: name, lifetime: 1)
+        try writer.set(.success(data: .johnDoe))
+
+        // Reload twice inside the lifetime — each one used to buy another full lifetime.
+        try await Task.sleep(for: .milliseconds(400))
+        _ = OnDiskCache<User>(name: name, lifetime: 1)
+        try await Task.sleep(for: .milliseconds(400))
+        _ = OnDiskCache<User>(name: name, lifetime: 1)
+        try await Task.sleep(for: .milliseconds(400))
+
+        let final = OnDiskCache<User>(name: name, lifetime: 1)
+
+        XCTAssertTrue(final.isExpired, "cache outlived its lifetime because reloads kept renewing it")
+        XCTAssertEqual(final.value, .loading(cachedData: .johnDoe), "expired value stays available as cached data")
+        try final.clear()
+    }
+
+    // MARK: Writing
+
+    /// A non-success result takes the file with it, so disk and memory cannot disagree.
+    func test_SettingANonSuccessResultRemovesTheFile() throws {
+        let name = "non-success-\(UUID().uuidString)"
+        let store = OnDiskCache<User>(name: name, lifetime: 30)
+        try store.set(.success(data: .johnDoe))
+        XCTAssertTrue(try store.cacheFileURL().isFile)
+
+        try store.set(.failure(cachedData: nil, error: CoreError.notFound))
+
+        XCTAssertFalse(try store.cacheFileURL().isFile)
+        XCTAssertNil(store.cachedDate)
+    }
+
+    /// `set` reports a failed write instead of logging it and returning as though it had worked.
+    func test_SetPropagatesAnEncodingFailure() throws {
+        struct Unencodable: Codable {
+            func encode(to encoder: any Encoder) throws { throw CoreError.notFound }
+            init() {}
+            init(from decoder: any Decoder) throws { self.init() }
+        }
+
+        let store = OnDiskCache<Unencodable>(name: "unencodable-\(UUID().uuidString)", lifetime: 30)
+
+        XCTAssertThrowsError(try store.set(.success(data: Unencodable())))
+        try? store.clear()
+    }
+
+    /// Clearing a cache that was never written is not an error.
+    func test_ClearingAnEmptyCacheDoesNotThrow() {
+        let store = OnDiskCache<User>(name: "never-written-\(UUID().uuidString)", lifetime: 30)
+
+        XCTAssertNoThrow(try store.clear())
+    }
+
+    /// Two caches naming different payloads do not read each other's files.
+    func test_CachesAreKeyedByName() throws {
+        let users = OnDiskCache<User>(name: "keyed-users-\(UUID().uuidString)", lifetime: 30)
+        let cars = OnDiskCache<Car>(name: "keyed-cars-\(UUID().uuidString)", lifetime: 30)
+
+        try users.set(.success(data: .johnDoe))
+        try cars.set(.success(data: .civic))
+
+        XCTAssertEqual(users.value, .success(data: .johnDoe))
+        XCTAssertEqual(cars.value, .success(data: .civic))
+
+        try users.clear()
+        try cars.clear()
+    }
 }
