@@ -1,21 +1,21 @@
 //
 //  ActionTestSettingView.swift
-//  DailyDoublet
+//  TestSettingFoundation
 //
-//  Created by Porter McGary on 10/17/24.
+//  Created by Porter McGary on 5/26/24.
 //
 
 import SwiftUI
 
 public struct ActionTestSettingView: View {
     @State private var presentConfirmation = false
-    
+
     let setting: any ActionTestSetting
-    
+
     public init(_ setting: any ActionTestSetting) {
         self.setting = setting
     }
-    
+
     public var body: some View {
         if setting.presentConfirmation {
             base.confirmationDialog("Are you sure?", isPresented: $presentConfirmation) {
@@ -25,7 +25,7 @@ public struct ActionTestSettingView: View {
             base
         }
     }
-    
+
     private var base: some View {
         HStack {
             TestSettingRow(setting)

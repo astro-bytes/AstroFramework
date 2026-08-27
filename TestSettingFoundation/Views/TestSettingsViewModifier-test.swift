@@ -1,49 +1,97 @@
 //
 //  TestSettingsViewModifier.swift
-//  DailyDoublet
+//  TestSettingFoundation
 //
-//  Created by Porter McGary on 11/6/24.
+//  Created by Porter McGary on 5/26/24.
 //
 
 import SwiftUI
 
+/// Puts the Test Settings entry point in the toolbar and presents the list from it.
+///
+/// Reach for ``SwiftUI/View/testSettings(_:configuration:)`` rather than this directly.
 @available(macOS, unavailable)
 public struct TestSettingsViewModifier: ViewModifier {
+    private static let transitionID = "test-settings"
+
     @State private var isTestSettingsPresented = false
-    
+    @Namespace private var namespace
+
     private let sections: TestSettingSections
-    private let buttonStyle: Color
-    
-    public init(_ sections: TestSettingSections, buttonStyle: Color = .accentColor) {
+    private let configuration: TestSettingsConfiguration
+
+    public init(_ sections: TestSettingSections, configuration: TestSettingsConfiguration = .init()) {
         self.sections = sections
-        self.buttonStyle = buttonStyle
+        self.configuration = configuration
     }
-    
+
     public func body(content: Content) -> some View {
-        content.fullScreenCover(isPresented: $isTestSettingsPresented) {
-            NavigationStack {
-                TestSettingsView(sections).toolbar {
+        if configuration.isEnabled {
+            content
+                .fullScreenCover(isPresented: $isTestSettingsPresented) { cover }
+                .toolbar {
+                    ToolbarItem(placement: configuration.toolbar.placement) { button }
+
+                    if configuration.toolbar.showsTrailingSpacer {
+                        ToolbarSpacer(.fixed, placement: configuration.toolbar.placement)
+                    }
+                }
+        } else {
+            // Not "present nothing" but "was never here" — the button itself is what a screenshot
+            // run needs gone.
+            content
+        }
+    }
+
+    private var cover: some View {
+        NavigationStack {
+            TestSettingsView(sections, configuration: configuration)
+                .toolbar {
                     ToolbarItem(placement: .cancellationAction) {
-                        Button { isTestSettingsPresented = false } label: {
-                            Image(systemName: "xmark")
+                        Button("Close", systemImage: "xmark") {
+                            isTestSettingsPresented = false
                         }
                     }
                 }
-            }
         }
-        .toolbar {
-            ToolbarItem(placement: .secondaryAction) {
-                Button("Test Settings", systemImage: "testtube.2") {
-                    isTestSettingsPresented = true
-                }
-                .foregroundStyle(buttonStyle)
-            }
+        .zoomTransition(id: Self.transitionID, in: namespace, enabled: configuration.usesZoomTransition)
+    }
+
+    private var button: some View {
+        Button(configuration.toolbar.label, systemImage: configuration.toolbar.systemImage) {
+            isTestSettingsPresented = true
+        }
+        .zoomTransitionSource(id: Self.transitionID, in: namespace, enabled: configuration.usesZoomTransition)
+    }
+}
+
+// Zoom navigation transitions do not exist on macOS, which is also why the modifier above is
+// unavailable there.
+@available(macOS, unavailable)
+private extension View {
+    @ViewBuilder
+    func zoomTransition(id: String, in namespace: Namespace.ID, enabled: Bool) -> some View {
+        if enabled {
+            navigationTransition(.zoom(sourceID: id, in: namespace))
+        } else {
+            self
+        }
+    }
+
+    @ViewBuilder
+    func zoomTransitionSource(id: String, in namespace: Namespace.ID, enabled: Bool) -> some View {
+        if enabled {
+            matchedTransitionSource(id: id, in: namespace)
+        } else {
+            self
         }
     }
 }
 
 @available(macOS, unavailable)
 #Preview {
-    Text("Hello, world!")
-        .modifier(TestSettingsViewModifier([:]))
+    NavigationStack {
+        Text("Hello, world!")
+            .modifier(TestSettingsViewModifier([:]))
+    }
 }
