@@ -1,8 +1,8 @@
 //
 //  InputTestSettingRow.swift
-//  DailyDoublet
+//  TestSettingFoundation
 //
-//  Created by Porter McGary on 10/17/24.
+//  Created by Porter McGary on 6/22/24.
 //
 
 import SwiftUI
@@ -10,13 +10,13 @@ import SwiftUI
 public struct InputTestSettingRow: View {
     @State private var isAlertPresented = false
     @State private var input = ""
-    
+
     let setting: any InputTestSetting
-    
+
     public init(_ setting: any InputTestSetting) {
         self.setting = setting
     }
-    
+
     public var body: some View {
         HStack {
             TestSettingRow(setting)
@@ -24,16 +24,18 @@ public struct InputTestSettingRow: View {
             Button(setting.buttonLabel) { isAlertPresented.toggle() }
                 .buttonStyle(.bordered)
         }
-        .onChange(of: input) { oldValue, newValue in
-            setting.onUpdate(newValue)
-        }
         .alert(setting.alertLabel, isPresented: $isAlertPresented) {
             TextField(setting.prompt, text: $input)
-            
-            Button(setting.buttonLabel, role: .destructive) {
+
+            // The value commits here and nowhere else. Reporting it from an `onChange` of the field
+            // sends a value per keystroke — so a setting reading it is walked through every prefix
+            // of what is being typed — and clearing the field on dismissal reports the empty string
+            // as though the user had chosen it, wiping the setting on Cancel.
+            Button(setting.buttonLabel) {
+                setting.onUpdate(input)
                 input = ""
             }
-            
+
             Button("Cancel", role: .cancel) {
                 input = ""
             }

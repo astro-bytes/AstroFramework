@@ -5,13 +5,15 @@ import PackageDescription
 
 let package = Package(
     name: "AstroFramework",
+    // Spelled as strings because the `.v26` cases need PackageDescription 6.2, and raising
+    // swift-tools-version that far would also switch every target to the Swift 6 language mode.
     platforms: [
-        .macOS(.v14),
-        .iOS(.v17),
-        .watchOS(.v10),
-        .tvOS(.v17),
-        .macCatalyst(.v17),
-        .visionOS(.v1)
+        .macOS("26.0"),
+        .iOS("26.0"),
+        .watchOS("26.0"),
+        .tvOS("26.0"),
+        .macCatalyst("26.0"),
+        .visionOS("26.0")
     ],
     products: [
         // Products define the executables and libraries a package produces, making them visible to other packages.
@@ -92,6 +94,10 @@ let package = Package(
         .testTarget(
             name: "LoggerFoundationTests",
             dependencies: ["LoggerFoundation", "Mocks"]
+        ),
+        .testTarget(
+            name: "TestSettingFoundationTests",
+            dependencies: ["TestSettingFoundation"]
         ),
         .testTarget(
             name: "UIFoundationTests",
