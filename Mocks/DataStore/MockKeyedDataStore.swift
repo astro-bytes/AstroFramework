@@ -11,7 +11,10 @@ import UseCaseFoundation
 import GatewayFoundation
 import UtilityFoundation
 
-public class MockKeyedDataStore<Element: Identifiable>: KeyedDataStore {
+/// `@unchecked` because the spy flags are plain stored properties. The value it publishes goes
+/// through `CurrentValueSubject`, which is thread-safe; tests read the flags after the work under
+/// test has finished.
+public final class MockKeyedDataStore<Element: Identifiable & Sendable>: KeyedDataStore, @unchecked Sendable where Element.ID: Sendable {
     public typealias Payload = [Element.ID: Element]
     
     var calledSetElement = false

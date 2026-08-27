@@ -35,7 +35,7 @@ import Synchronization
 /// ```swift
 /// Logger.minimumLevel = .warning
 /// ```
-public final class Logger {
+public final class Logger: Sendable {
 
     /// Singleton pattern shared instance.
     static let shared = Logger()

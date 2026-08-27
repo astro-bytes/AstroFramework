@@ -13,14 +13,14 @@ class AnyPublisherExtensionTests: XCTestCase {
 
     /// Short on purpose. Every test here that succeeds should finish well inside it; a test that
     /// takes the whole interval is reporting a regression, not being careful.
-    private let timeout: TimeInterval = 1
+    private static let timeout: TimeInterval = 1
 
     // MARK: Returning promptly
 
     func testFirst_ReturnsAValueAlreadyHeld() async throws {
         let subject = CurrentValueSubject<Int, Never>(5)
 
-        let value = try await subject.eraseToAnyPublisher().first(timeoutAfter: timeout) { $0 == 5 }
+        let value = try await subject.eraseToAnyPublisher().first(timeoutAfter: Self.timeout) { $0 == 5 }
 
         XCTAssertEqual(value, 5)
     }
@@ -35,19 +35,19 @@ class AnyPublisherExtensionTests: XCTestCase {
         let subject = CurrentValueSubject<Int, Never>(5)
 
         let start = Date()
-        _ = try await subject.eraseToAnyPublisher().first(timeoutAfter: timeout) { $0 == 5 }
+        _ = try await subject.eraseToAnyPublisher().first(timeoutAfter: Self.timeout) { $0 == 5 }
         let elapsed = Date().timeIntervalSince(start)
 
-        XCTAssertLessThan(elapsed, timeout / 2, "first() waited on a value that was already there")
+        XCTAssertLessThan(elapsed, Self.timeout / 2, "first() waited on a value that was already there")
     }
 
     func testFirst_ReturnsTheFirstMatchNotTheLast() async {
         let subject = CurrentValueSubject<Int, Never>(0)
-        let publisher = subject.eraseToAnyPublisher()
+        nonisolated(unsafe) let publisher = subject.eraseToAnyPublisher()
         let expectation = expectation(description: "Returns the earlier match")
 
         Task {
-            let value = try? await publisher.first(timeoutAfter: timeout) { $0 > 0 }
+            let value = try? await publisher.first(timeoutAfter: Self.timeout) { $0 > 0 }
             XCTAssertEqual(value, 1)
             expectation.fulfill()
         }
@@ -59,16 +59,16 @@ class AnyPublisherExtensionTests: XCTestCase {
         subject.send(1)
         subject.send(2)
 
-        await fulfillment(of: [expectation], timeout: timeout + 1)
+        await fulfillment(of: [expectation], timeout: Self.timeout + 1)
     }
 
     func testFirst_SkipsValuesFailingThePredicate() async {
         let subject = CurrentValueSubject<Int, Never>(1)
-        let publisher = subject.eraseToAnyPublisher()
+        nonisolated(unsafe) let publisher = subject.eraseToAnyPublisher()
         let expectation = expectation(description: "Skips to the match")
 
         Task {
-            let value = try? await publisher.first(timeoutAfter: timeout) { $0 == 3 }
+            let value = try? await publisher.first(timeoutAfter: Self.timeout) { $0 == 3 }
             XCTAssertEqual(value, 3)
             expectation.fulfill()
         }
@@ -77,13 +77,13 @@ class AnyPublisherExtensionTests: XCTestCase {
         subject.send(2)
         subject.send(3)
 
-        await fulfillment(of: [expectation], timeout: timeout + 1)
+        await fulfillment(of: [expectation], timeout: Self.timeout + 1)
     }
 
     func testFirst_DefaultPredicateTakesAnyValue() async throws {
         let subject = CurrentValueSubject<Int, Never>(42)
 
-        let value = try await subject.eraseToAnyPublisher().first(timeoutAfter: timeout)
+        let value = try await subject.eraseToAnyPublisher().first(timeoutAfter: Self.timeout)
 
         XCTAssertEqual(value, 42)
     }
@@ -118,12 +118,12 @@ class AnyPublisherExtensionTests: XCTestCase {
 
     func testFirst_PropagatesUpstreamFailure() async {
         let subject = PassthroughSubject<Int, TestError>()
-        let publisher = subject.eraseToAnyPublisher()
+        nonisolated(unsafe) let publisher = subject.eraseToAnyPublisher()
         let expectation = expectation(description: "Propagates the failure")
 
         Task {
             do {
-                _ = try await publisher.first(timeoutAfter: timeout, scheduler: .global())
+                _ = try await publisher.first(timeoutAfter: Self.timeout, scheduler: .global())
                 XCTFail("Should throw")
             } catch {
                 XCTAssertEqual(error as? TestError, .genericError)
@@ -134,19 +134,19 @@ class AnyPublisherExtensionTests: XCTestCase {
         try? await Task.sleep(for: .milliseconds(100))
         subject.send(completion: .failure(.genericError))
 
-        await fulfillment(of: [expectation], timeout: timeout + 1)
+        await fulfillment(of: [expectation], timeout: Self.timeout + 1)
     }
 
     /// A publisher that finishes without ever matching is out of chances, so it reports the same
     /// thing as running out of time.
     func testFirst_TimesOutWhenTheStreamFinishesWithoutAMatch() async {
         let subject = PassthroughSubject<Int, Never>()
-        let publisher = subject.eraseToAnyPublisher()
+        nonisolated(unsafe) let publisher = subject.eraseToAnyPublisher()
         let expectation = expectation(description: "Reports timeout")
 
         Task {
             do {
-                _ = try await publisher.first(timeoutAfter: timeout, scheduler: .global()) { $0 == 9 }
+                _ = try await publisher.first(timeoutAfter: Self.timeout, scheduler: .global()) { $0 == 9 }
                 XCTFail("Should throw")
             } catch {
                 XCTAssertEqual(error as? CoreError, .timeout)
@@ -157,12 +157,12 @@ class AnyPublisherExtensionTests: XCTestCase {
         try? await Task.sleep(for: .milliseconds(100))
         subject.send(completion: .finished)
 
-        await fulfillment(of: [expectation], timeout: timeout + 1)
+        await fulfillment(of: [expectation], timeout: Self.timeout + 1)
     }
 
     func testFirst_ThrowsCancellationWhenTheAwaitingTaskIsCancelled() async {
         let subject = PassthroughSubject<Int, Never>()
-        let publisher = subject.eraseToAnyPublisher()
+        nonisolated(unsafe) let publisher = subject.eraseToAnyPublisher()
         let expectation = expectation(description: "Reports cancellation")
 
         let task = Task {
@@ -178,6 +178,6 @@ class AnyPublisherExtensionTests: XCTestCase {
         try? await Task.sleep(for: .milliseconds(100))
         task.cancel()
 
-        await fulfillment(of: [expectation], timeout: timeout + 1)
+        await fulfillment(of: [expectation], timeout: Self.timeout + 1)
     }
 }

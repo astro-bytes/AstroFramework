@@ -1,6 +1,6 @@
 //
 //  ErrorAlert+ViewModifier.swift
-//  UniversalUI
+//  UIFoundation
 //
 //  Created by Porter McGary on 1/19/24.
 //
@@ -12,9 +12,9 @@ import UtilityFoundation
 struct ErrorAlertViewModifier: ViewModifier {
     
     @Environment(\.reportError) var report
-    @Binding var error: Error?
+    @Binding var error: (any Error)?
     
-    init(error: Binding<Error?>) {
+    init(error: Binding<(any Error)?>) {
         self._error = error
     }
     
@@ -119,16 +119,13 @@ struct ErrorAlertViewModifier: ViewModifier {
     }
 }
 
-struct ReportErrorEnvironmentKey: EnvironmentKey {
-    static var defaultValue: ((Error) -> Void)?
-}
-
-extension EnvironmentValues {
-    /// A key for setting and retrieving the closure to report errors.
-    public var reportError: ((Error) -> Void)? {
-        get { self[ReportErrorEnvironmentKey.self] }
-        set { self[ReportErrorEnvironmentKey.self] = newValue }
-    }
+public extension EnvironmentValues {
+    /// The closure called when the user asks for an error to be reported, or `nil` if the app has
+    /// not offered one — in which case no Report button is shown.
+    ///
+    /// Set it with ``SwiftUI/View/reportError(_:)``. The `@Entry` macro replaces a hand-written
+    /// `EnvironmentKey` whose `static var defaultValue` was global mutable state.
+    @Entry var reportError: (@Sendable (any Error) -> Void)?
 }
 
 public extension View {
@@ -140,25 +137,25 @@ public extension View {
     /// Additionally use the `.reportError(_:)` function to perform an action when the user presses the report button on the dialog.
     /// If this environment value is not provided no reporting is done ad no report button is shown
     // TODO: Add Example
-    func errorAlert(error: Binding<Error?>) -> some View {
+    func errorAlert(error: Binding<(any Error)?>) -> some View {
         modifier(ErrorAlertViewModifier(error: error))
     }
     
     @available(*, deprecated)
-    func errorAlert(error: Binding<Error?>, retry: (() -> Void)? = nil) -> some View {
+    func errorAlert(error: Binding<(any Error)?>, retry: (() -> Void)? = nil) -> some View {
         modifier(ErrorAlertViewModifier(error: error))
     }
     
     // TODO: Add Example
     @available(*, deprecated)
-    func errorAlert(error: Binding<Error?>, asyncRetry: @escaping () async -> Void) -> some View {
+    func errorAlert(error: Binding<(any Error)?>, asyncRetry: @escaping () async -> Void) -> some View {
         modifier(ErrorAlertViewModifier(error: error))
     }
     
     /// Adds an environment variable that is called when needing to report an error
     /// - Parameter action: the functionality provided when reporting an error
     // TODO: Add Example
-    func reportError(_ action: @escaping (Error) -> Void) -> some View {
+    func reportError(_ action: @escaping @Sendable (any Error) -> Void) -> some View {
         environment(\.reportError, action)
     }
 }

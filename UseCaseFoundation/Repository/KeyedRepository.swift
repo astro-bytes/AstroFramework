@@ -11,7 +11,7 @@ import UtilityFoundation
 /// Protocol defining a keyed repository, which extends the basic repository pattern and provides methods to interact with data elements using their identifiers.
 public protocol KeyedRepository<Element>: Repository {
     /// Associated type representing the elements stored in the repository, which must conform to the `Identifiable` protocol.
-    associatedtype Element: Identifiable
+    associatedtype Element: Identifiable & Sendable where Element.ID: Sendable
     
     /// Retrieves an element from the repository by its identifier.
     ///

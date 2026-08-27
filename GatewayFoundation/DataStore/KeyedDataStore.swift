@@ -11,7 +11,7 @@ import UseCaseFoundation
 /// A protocol for a keyed data store, where elements are uniquely identified by their ID.
 public protocol KeyedDataStore<Element>: DataStore where Payload == [Element.ID: Element] {
     /// The type of elements stored in the data store, conforming to Identifiable.
-    associatedtype Element: Identifiable
+    associatedtype Element: Identifiable & Sendable where Element.ID: Sendable
     
     /// Retrieves an element from the data store by its ID.
     /// - Parameter id: The ID of the element to retrieve.

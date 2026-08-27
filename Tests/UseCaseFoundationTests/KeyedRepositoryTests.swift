@@ -14,7 +14,7 @@ import UtilityFoundation
 class KeyedRepositoryTests: XCTestCase {
 
     /// Kept short so a regression in the read path shows up here rather than in the suite's runtime.
-    private let timeout: TimeInterval = 1
+    private static let timeout: TimeInterval = 1
 
     var mockRepository: MockKeyedRepository<User>!
     
@@ -36,7 +36,7 @@ class KeyedRepositoryTests: XCTestCase {
         mockRepository = MockKeyedRepository<User>(.success(data: [expectedID: expectedData]))
         
         // When
-        let result = try await mockRepository.get(by: expectedID, within: timeout)
+        let result = try await mockRepository.get(by: expectedID, within: Self.timeout)
         
         // Then
         XCTAssertEqual(result, expectedData)
@@ -46,7 +46,7 @@ class KeyedRepositoryTests: XCTestCase {
     func testGetByID_Uninitialized() async throws {
         // When, Then
         do {
-             _ = try await mockRepository.get(by: UUID(), within: timeout)
+             _ = try await mockRepository.get(by: UUID(), within: Self.timeout)
             XCTFail("Should Throw")
         } catch {
             XCTAssertEqual(error as? CoreError, .notFound)
@@ -60,7 +60,7 @@ class KeyedRepositoryTests: XCTestCase {
         
         // When, Then
         do {
-            _ = try await mockRepository.get(by: UUID(), within: timeout)
+            _ = try await mockRepository.get(by: UUID(), within: Self.timeout)
             XCTFail("Should Throw")
         } catch {
             XCTAssertEqual(error as? CoreError, .timeout)
@@ -75,7 +75,7 @@ class KeyedRepositoryTests: XCTestCase {
         
         // When, Then
         do {
-            _ = try await mockRepository.get(by: UUID(), within: timeout)
+            _ = try await mockRepository.get(by: UUID(), within: Self.timeout)
             XCTFail("Should Throw")
         } catch {
             XCTAssertEqual(error as? CoreError, expectedError)

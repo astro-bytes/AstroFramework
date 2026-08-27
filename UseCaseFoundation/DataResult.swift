@@ -56,6 +56,10 @@ public enum DataResult<Payload> {
     }
 }
 
+/// `DataResult` travels between concurrency domains — out of a repository, into a view — so it is
+/// `Sendable` exactly when the payload it carries is. `Error` is already `Sendable`.
+extension DataResult: Sendable where Payload: Sendable {}
+
 extension DataResult: Equatable where Payload: Equatable {
     public static func ==(lhs: Self, rhs: Self) -> Bool {
         switch lhs {

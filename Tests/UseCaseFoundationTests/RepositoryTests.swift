@@ -14,14 +14,14 @@ class RepositoryTests: XCTestCase {
 
     /// Long enough that a correct implementation never reaches it, short enough that a regression
     /// shows up as a slow test rather than a slow suite.
-    private let timeout: TimeInterval = 1
+    private static let timeout: TimeInterval = 1
 
     // MARK: Reading what the repository already holds
 
     func testGet_Success() async throws {
         let repository = MockRepository<User>(.success(data: .johnDoe))
 
-        let result = try await repository.get(within: timeout)
+        let result = try await repository.get(within: Self.timeout)
 
         XCTAssertEqual(result, .johnDoe)
     }
@@ -36,10 +36,10 @@ class RepositoryTests: XCTestCase {
         let repository = MockRepository<User>(.success(data: .johnDoe))
 
         let start = Date()
-        _ = try await repository.get(within: timeout)
+        _ = try await repository.get(within: Self.timeout)
         let elapsed = Date().timeIntervalSince(start)
 
-        XCTAssertLessThan(elapsed, timeout / 2, "get() waited on a value it already had")
+        XCTAssertLessThan(elapsed, Self.timeout / 2, "get() waited on a value it already had")
     }
 
     func testGet_Failure() async throws {
@@ -47,7 +47,7 @@ class RepositoryTests: XCTestCase {
         let repository = MockRepository<User>(.failure(cachedData: nil, error: expectedError))
 
         do {
-            _ = try await repository.get(within: timeout)
+            _ = try await repository.get(within: Self.timeout)
             XCTFail("Should throw")
         } catch {
             XCTAssertEqual(error as? CoreError, expectedError)
@@ -60,7 +60,7 @@ class RepositoryTests: XCTestCase {
         let repository = MockRepository<User>(.failure(cachedData: .janeDoe, error: CoreError.timeout))
 
         do {
-            _ = try await repository.get(within: timeout)
+            _ = try await repository.get(within: Self.timeout)
             XCTFail("Should throw")
         } catch {
             XCTAssertEqual(error as? CoreError, .timeout)
@@ -71,7 +71,7 @@ class RepositoryTests: XCTestCase {
         let repository = MockRepository<User>(.loading(cachedData: nil))
 
         do {
-            _ = try await repository.get(within: timeout)
+            _ = try await repository.get(within: Self.timeout)
             XCTFail("Should throw")
         } catch {
             XCTAssertEqual(error as? CoreError, .timeout)
@@ -80,21 +80,16 @@ class RepositoryTests: XCTestCase {
 
     func testGet_LoadingResolvesWhenTheValueArrives() async throws {
         let repository = MockRepository<User>(.loading(cachedData: nil))
-        let expectation = expectation(description: "Should have value")
 
-        Task {
-            do {
-                let value = try await repository.get(within: timeout)
-                XCTAssertEqual(value, .janeDoe)
-            } catch {
-                XCTFail("Unexpected failure: \(error)")
-            }
-            expectation.fulfill()
-        }
+        async let awaited = repository.get(within: Self.timeout)
 
+        // Let the read subscribe before the value lands, so this exercises arriving-while-waiting
+        // rather than reading a value that is already there.
+        try? await Task.sleep(for: .milliseconds(100))
         repository.set(.janeDoe)
 
-        await fulfillment(of: [expectation], timeout: timeout + 1)
+        let value = try await awaited
+        XCTAssertEqual(value, .janeDoe)
     }
 
     // MARK: Refreshing an uninitialized repository
@@ -109,7 +104,7 @@ class RepositoryTests: XCTestCase {
         let repository = MockRepository<User>(.uninitialized)
         repository.nextRefreshResult = .success(data: .johnDoe)
 
-        let result = try await repository.get(within: timeout)
+        let result = try await repository.get(within: Self.timeout)
 
         XCTAssertEqual(result, .johnDoe)
     }
@@ -119,7 +114,7 @@ class RepositoryTests: XCTestCase {
         repository.nextRefreshResult = .failure(cachedData: nil, error: CoreError.timeout)
 
         do {
-            _ = try await repository.get(within: timeout)
+            _ = try await repository.get(within: Self.timeout)
             XCTFail("Should throw")
         } catch {
             XCTAssertEqual(error as? CoreError, .timeout)
@@ -131,7 +126,7 @@ class RepositoryTests: XCTestCase {
         let repository = MockRepository<User>(.uninitialized)
 
         do {
-            _ = try await repository.get(within: timeout)
+            _ = try await repository.get(within: Self.timeout)
             XCTFail("Should throw")
         } catch {
             XCTAssertEqual(error as? CoreError, .notFound)
