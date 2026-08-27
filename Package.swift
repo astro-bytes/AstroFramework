@@ -5,16 +5,16 @@ import PackageDescription
 
 let package = Package(
     name: "AstroFramework",
-    // The iOS 18 line. Spelled as strings because the matching `.v18` cases need
-    // PackageDescription 6.0, and raising swift-tools-version that far would also switch every
-    // target to the Swift 6 language mode.
+    // The 26 line. Spelled as strings because the matching `.v26` cases need PackageDescription
+    // 6.2, and raising swift-tools-version that far would also switch every target to the Swift 6
+    // language mode.
     platforms: [
-        .macOS("15.0"),
-        .iOS("18.0"),
-        .watchOS("11.0"),
-        .tvOS("18.0"),
-        .macCatalyst("18.0"),
-        .visionOS("2.0")
+        .macOS("26.0"),
+        .iOS("26.0"),
+        .watchOS("26.0"),
+        .tvOS("26.0"),
+        .macCatalyst("26.0"),
+        .visionOS("26.0")
     ],
     products: [
         // Products define the executables and libraries a package produces, making them visible to other packages.
