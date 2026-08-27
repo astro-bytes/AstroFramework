@@ -241,4 +241,68 @@ final class LoggerTests: XCTestCase {
 
         XCTAssertEqual(Logger.minimumLevel, .debug)
     }
+
+    // MARK: Timestamps
+
+    /// The time is the time of the *call*, not of the delivery.
+    ///
+    /// `date: Date = .now` is a default argument, so it is evaluated at the call site before the
+    /// entry is queued. That is the property that makes asynchronous delivery acceptable for a
+    /// logger at all: the log can arrive late, but it must not claim to have happened late.
+    func testTheTimestampIsCapturedAtTheCallSiteNotAtDelivery() throws {
+        let mock = MockInterceptor()
+        Logger.apply(interceptor: SlowInterceptor(delay: 0.25))
+        Logger.apply(interceptor: mock)
+
+        let before = Date.now
+        Logger.log(.info, msg: "stamped")
+        let after = Date.now
+
+        Logger.drain()
+
+        let entry = try XCTUnwrap(mock.last)
+        XCTAssertGreaterThanOrEqual(entry.date, before)
+        XCTAssertLessThanOrEqual(entry.date, after, "the date was stamped when delivered, not when called")
+        XCTAssertGreaterThan(Date.now.timeIntervalSince(entry.date), 0.2, "delivery really was delayed")
+    }
+
+    /// Timestamps increase in the same order the calls were made, which is what makes a log file
+    /// readable.
+    func testTimestampsAreMonotonicAcrossQueuedLogs() throws {
+        let mock = MockInterceptor()
+        Logger.apply(interceptor: mock)
+
+        for index in 0 ..< 50 {
+            Logger.log(.info, msg: "\(index)")
+        }
+        Logger.drain()
+
+        let dates = mock.entries.map(\.date)
+        XCTAssertEqual(dates, dates.sorted(), "timestamps are out of order")
+    }
+
+    /// An explicitly supplied date wins over the default, so a caller replaying stored events can
+    /// log them with the time they actually happened.
+    func testAnExplicitDateIsPreserved() throws {
+        let mock = MockInterceptor()
+        Logger.apply(interceptor: mock)
+        let historical = Date(timeIntervalSince1970: 1_000_000)
+
+        Logger.log(.info, msg: "replayed", date: historical)
+        Logger.drain()
+
+        XCTAssertEqual(mock.last?.date, historical)
+    }
+}
+
+/// Holds up delivery so a test can tell a call-time stamp from a delivery-time one.
+private struct SlowInterceptor: Interceptor {
+    let delay: TimeInterval
+
+    func intercept(
+        level: Logger.Level, message: String, error: (any Error)?, data: [String: String]?,
+        domain: String, date: Date, file: String, line: Int, method: String
+    ) {
+        Thread.sleep(forTimeInterval: delay)
+    }
 }
