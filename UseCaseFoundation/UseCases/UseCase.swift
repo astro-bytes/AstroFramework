@@ -1,6 +1,6 @@
 //
 //  UseCase.swift
-//
+//  UseCaseFoundation
 //
 //  Created by Porter McGary on 5/13/24.
 //

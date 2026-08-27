@@ -1,6 +1,6 @@
 //
 //  ActionableError.swift
-//  
+//  UIFoundation
 //
 //  Created by Porter McGary on 7/29/24.
 //
